@@ -9,21 +9,6 @@
 #	Remove the dashe
 #	Write updated line to file
 
-#jsonfilename = "C:\Users\Lawrence\Documents\masters_project\data_converted\Parking_Regulation_WSG84.json";
-jsonfilename = "C:\Users\Lawrence\Documents\masters_project\data_converted\Parking_Regulation_WSG84_sample.json";
-outputfilename = "C:\Users\Lawrence\Documents\masters_project\data_converted\Parking_cleantime.json";
-
-import csv;
-import json;
-
-jsonfile = open(jsonfilename, 'r')
-cleanfile = open(outputfilename, 'w')
-
-data = json.load(jsonfile);
-
-import re;
-# regex flags
-no_case = re.I;
 # Regular expression
 times_AM_AM = r'([0-9]+:?[0-9]*AM)-([0-9]+:?[0-9]*AM)';
 times_AM_PM = r'([0-9]+:?[0-9]*AM)-([0-9]+:?[0-9]*PM)';
@@ -34,50 +19,85 @@ times_none_AM = r'([0-9]+:?[0-9]*)-([0-9]+:?[0-9]*AM)';
 times_PM_none = r'([0-9]+:?[0-9]*PM)-([0-9]+:?[0-9]*)';
 times_none_PM = r'([0-9]+:?[0-9]*)-([0-9]+:?[0-9]*PM)';
 
-times_regexes = ([times_AM_AM,times_AM_PM,times_PM_AM,times_PM_PM,
-				times_AM_none,times_none_AM,times_PM_none,times_none_PM]);
+import re;
+# regex flags
+no_case = re.I;
 
-for i in range(len(times_regexes)):
-	current_regex = times_regexes[i];
-	print "Current regex is " + current_regex;
+# Given a string, return the regular expression that matches it.
+# Return None if none match.
+def findMatch(inputString):
+	if not(re.match(times_AM_AM,inputString,no_case) is None):
+		return times_AM_AM;
+	if not(re.match(times_AM_PM,inputString,no_case) is None):
+		return times_AM_PM;
+	if not(re.match(times_PM_AM,inputString,no_case) is None):
+		return times_PM_AM;
+	if not(re.match(times_PM_PM,inputString,no_case) is None):
+		return times_PM_PM;
+	if not(re.match(times_AM_none,inputString,no_case) is None):
+		return times_AM_none;
+	if not(re.match(times_none_AM,inputString,no_case) is None):
+		return times_none_AM;
+	if not(re.match(times_PM_none,inputString,no_case) is None):
+		return times_PM_none;
+	if not(re.match(times_none_PM,inputString,no_case) is None):
+		return times_none_PM;
+
+	return None;
+
+# Find "search" hits
+def findSearch(inputString):
+	if not(re.search(times_AM_AM,inputString,no_case) is None):
+		return times_AM_AM;
+	if not(re.search(times_AM_PM,inputString,no_case) is None):
+		return times_AM_PM;
+	if not(re.search(times_PM_AM,inputString,no_case) is None):
+		return times_PM_AM;
+	if not(re.search(times_PM_PM,inputString,no_case) is None):
+		return times_PM_PM;
+	if not(re.search(times_AM_none,inputString,no_case) is None):
+		return times_AM_none;
+	if not(re.search(times_none_AM,inputString,no_case) is None):
+		return times_none_AM;
+	if not(re.search(times_PM_none,inputString,no_case) is None):
+		return times_PM_none;
+	if not(re.search(times_none_PM,inputString,no_case) is None):
+		return times_none_PM;
+
+	return None;
+
+def run(inputfilename, outputfilename):
+	import csv;
+	import json;
+
+	jsonfile = open(inputfilename, 'r');
+	cleanfile = open(outputfilename, 'w');
+
+	data = json.load(jsonfile);
+
+	times_regexes = ([times_AM_AM,times_AM_PM,times_PM_AM,times_PM_PM,
+					times_AM_none,times_none_AM,times_PM_none,times_none_PM]);
+
+	outputjsonlist = [];
+
 	for line in data:
 		description = line['description'];
-		matchobj = re.search(current_regex,description,no_case);
-		if not(matchobj is None):
-			re.sub(current_regex,'\1 \2',description,no_case);
-			print description;
+		for i in range(len(times_regexes)):
+			current_regex = times_regexes[i];
+			matchobj = re.search(current_regex,description,no_case);
+			if not(matchobj is None):
+				description = re.sub(current_regex,'\g<1> \g<2>',description,no_case);
+		line['description'] = description;
+		outputjsonlist.append(line);
 
-# for line in data:
-# 	#print str(line['id']) + " " + line['description'];
-	
-# 	# test - print out the segment that is matched
-# 	#matchobj = re.search(time_regex,line['description'],no_case);
-# 	matchobj = re.search(times_capture,line['description'],no_case);
-# 	description = line['description'];
-	
-# 	if not(matchobj is None):
-# 		print matchobj.group(0) + " " + matchobj.group(1) + " " + matchobj.group(2);
-# 		# replaceobj = (re.sub(times_capture,
-# 		# 	matchobj.group(1) + " " + matchobj.group(2),
-# 		# 	description,
-# 		# 	no_case));
+	json.dump(outputjsonlist,cleanfile);
+	cleanfile.close();
 
-# 		replaceobj = (re.sub(times_capture,
-# 			"",
-# 			description,
-# 			no_case));
-
-# 		#print str(line['id']) + " " + matchobj.group() + " " + description;
-# 		#print str(line['id']) + " " + matchobj.group() + " " + replaceobj;
-# 		print str(line['id']) + ". " + replaceobj;
-
-# 		print "\n";
-# print 'capture test'
-# for line in data:
-# 	matchobj = re.search(times_capture,line['description'],no_case);
-# 	if not(matchobj is None):
-# 		print str(line['id']) + " " + matchobj.group(0) + " " + matchobj.group(1) + " " + matchobj.group(2) + " " + description;
-
-
+if __name__ == '__main__':
+	#inputfilename = "C:\Users\Lawrence\Documents\parking\data\Parking_cleanarrow_sample.json";
+	#outputfilename = "C:\Users\Lawrence\Documents\parking\data\Parking_cleanarrow_cleantime_sample.json";
+	inputfilename = "C:\Users\Lawrence\Documents\parking\data\Parking_cleanarrow.json";
+	outputfilename = "C:\Users\Lawrence\Documents\parking\data\Parking_cleanarrow_cleantime.json";
+	run(inputfilename,outputfilename);
 
 

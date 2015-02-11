@@ -3,27 +3,70 @@
 # Go through whatever preprocessing steps are defined here
 # Produce output
 
-def preprocess(inputfilename, outpufilename):
+# filenames
+csvfilename = "C:\Users\Lawrence\Documents\parking\data\Parking_Regulation_WSG84.csv";
+jsonfilename = "C:\Users\Lawrence\Documents\parking\data\Parking.json";
+arrowfilename = "C:\Users\Lawrence\Documents\parking\data\Parking_cleanarrow.json";
+timefilename = "C:\Users\Lawrence\Documents\parking\data\Parking_cleanarrow_cleantime.json";
+
+outputfilename = "C:\Users\Lawrence\Documents\parking\data\Parking_clean_all.json";
+
+import jsonHelper;
+import time;
+
+def preprocess():
+	start = time.time();
 	tempfilename = "temp";
 
+	# CSV to JSON
+	print 'Converting from CSV to JSON.';
+	import convertCSVtoJSONList as convertCtoJ;
+	convertCtoJ.convertCSVtoJSON(csvfilename,jsonfilename);
+	tempJSONObj = jsonHelper.getJSONObjectFromFile(jsonfilename);
+	numEntries = jsonHelper.getNumEntries(tempJSONObj);
+
 	# Clean up arrows
+	print 'Cleaning up arrows.';
 	import replaceArrows;
-	replaceArrows.replaceArrows(inputfilename,tempfilename);
+	replaceArrows.replaceArrows(jsonfilename,arrowfilename);
+	tempJSONObj = jsonHelper.getJSONObjectFromFile(arrowfilename);
+	numEntriesArrow = jsonHelper.getNumEntries(tempJSONObj);
+	assert numEntries == numEntriesArrow;
 
-	# Rename temp file to output
-	from os import rename;
-	from os import remove;
+	# Clean up times
+	print 'Cleaning up times.';
+	import removeDashesBetweenTimes;
+	removeDashesBetweenTimes.run(arrowfilename,timefilename);
+	tempJSONObj = jsonHelper.getJSONObjectFromFile(timefilename);
+	numEntriesTime = jsonHelper.getNumEntries(tempJSONObj);
+	assert numEntries == numEntriesTime;
+
+	# Test times
+	print 'Testing time regex.';
+	import testTimeRegex;
+	timeScriptFilename = 'removeDashesBetweenTimes.py';
+	testTimeRegex.testTimeRegex(timefilename,timeScriptFilename);
+
+	end = time.time();
+	print "Elapsed time was: " + str(end - start);
+
+	# return latest JSON object
+	return tempJSONObj;
+
+	# jsonHelper.getNumEntries(jsonHelper.getJSONObjectFromFile('../data/Parking_cleanarrow_cleantime.json'));
+	# jsonHelper.getNumEntries(jsonHelper.getJSONObjectFromFile('../data/Parking.json'));
+
+	# # Rename temp file to output
+	# from os import rename;
+	# from os import remove;
 	
-	# remove file if it already exists
-	try:
-		remove(outputfilename);
-	except:
-		print "File " + outputfilename + " already exists. Deleted.";
-	rename(tempfilename,outputfilename);
-	print "Wrote " + outputfilename;
-
+	# # remove file if it already exists
+	# try:
+	# 	remove(outputfilename);
+	# except:
+	# 	print "File " + outputfilename + " already exists. Deleted.";
+	# rename(tempfilename,outputfilename);
+	# print "Wrote " + outputfilename;
 
 if __name__ == '__main__':
-	jsonfilename = "C:\Users\Lawrence\Documents\masters_project\data_converted\Parking_Regulation_WSG84_sample.json";
-	outputfilename = "C:\Users\Lawrence\Documents\masters_project\data_converted\Parking_clean_all.json";
-	preprocess(jsonfilename,outputfilename);
+	data = preprocess();

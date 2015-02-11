@@ -33,6 +33,8 @@ def replaceArrows(jsonfilename, outputfilename):
 	cleanfile.close();
 
 if __name__ == '__main__':
-	jsonfilename = "C:\Users\Lawrence\Documents\masters_project\data_converted\Parking_Regulation_WSG84_sample.json";
-	outputfilename = "C:\Users\Lawrence\Documents\masters_project\data_converted\Parking_cleanarrow.json";
+	jsonfilename = "C:\Users\Lawrence\Documents\parking\data\Parking_Regulation_WSG84_sample.json";
+	outputfilename = "C:\Users\Lawrence\Documents\parking\data\Parking_cleanarrow_sample.json";
+	#jsonfilename = "C:\Users\Lawrence\Documents\parking\data\Parking_Regulation_WSG84.json";
+	#outputfilename = "C:\Users\Lawrence\Documents\parking\data\Parking_cleanarrow.json";
 	replaceArrows(jsonfilename,outputfilename);
