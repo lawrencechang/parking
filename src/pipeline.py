@@ -8,6 +8,7 @@ csvfilename = "C:\Users\Lawrence\Documents\parking\data\Parking_Regulation_WSG84
 jsonfilename = "C:\Users\Lawrence\Documents\parking\data\Parking.json";
 arrowfilename = "C:\Users\Lawrence\Documents\parking\data\Parking_cleanarrow.json";
 timefilename = "C:\Users\Lawrence\Documents\parking\data\Parking_cleanarrow_cleantime.json";
+daysfilename = "C:\Users\Lawrence\Documents\parking\data\Parking_cleanarrow_cleantime_cleandays.json";
 
 outputfilename = "C:\Users\Lawrence\Documents\parking\data\Parking_clean_all.json";
 
@@ -46,6 +47,14 @@ def preprocess():
 	import testTimeRegex;
 	timeScriptFilename = 'removeDashesBetweenTimes.py';
 	testTimeRegex.testTimeRegex(timefilename,timeScriptFilename);
+
+	# Normalize days of week
+	print 'Normalizing days of week.';
+	import cleanDays;
+	cleanDays.cleanDays(timefilename,daysfilename);
+	tempJSONObj = jsonHelper.getJSONObjectFromFile(daysfilename);
+	numEntriesDays = jsonHelper.getNumEntries(tempJSONObj);
+	assert numEntries == numEntriesDays;
 
 	end = time.time();
 	print "Elapsed time was: " + str(end - start);

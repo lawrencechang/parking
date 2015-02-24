@@ -3,7 +3,6 @@
 # Replace with some unique keyword, like ARROW_BOTH_DIRECTION
 
 def replaceArrows(jsonfilename, outputfilename):
-	import csv;
 	import json;
 
 	jsonfile = open(jsonfilename, 'r')
