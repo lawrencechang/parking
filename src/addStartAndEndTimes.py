@@ -23,7 +23,7 @@ def run(xmlFilename,inputJSONFilename,outputJSONFilename):
 	for line in inputJSON:
 		# if the line exists in the XML file, 
 		if (parseXML.hasLine(parsedXML,lineCounter)):
-			print "lineCounter: "+str(lineCounter);
+			#print "lineCounter: "+str(lineCounter);
 			# and if so, if that line contains two times
 			if (parseXML.hasTwoTimes(parsedXML,lineCounter)):
 				# Set the start and end time variables
@@ -42,6 +42,8 @@ def run(xmlFilename,inputJSONFilename,outputJSONFilename):
 
 	json.dump(outputJSONList,outputJSONFile);
 	outputJSONFile.close();
+
+	return outputJSONList;
 
 if __name__ == '__main__':
 	xmlFilename = "";

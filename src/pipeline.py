@@ -18,7 +18,9 @@ plaintext100periodsfilename = "C:\Users\Lawrence\Documents\parking\data\Parking_
 
 plaintextperiodsfilename = "C:\Users\Lawrence\Documents\parking\data\Parking_plaintext_periods.txt";
 
-startandendtimesjsonfilename = "C:\Users\Lawrence\Documents\parking\data\Parking_startend.txt";
+startandendtimesjsonfilename = "C:\Users\Lawrence\Documents\parking\data\Parking_startend.json";
+noparkingjsonfilename = "C:\Users\Lawrence\Documents\parking\data\Parking_startend_noparking.json";
+
 outputfilename = "C:\Users\Lawrence\Documents\parking\data\Parking_clean_all.json";
 
 import jsonHelper;
@@ -93,7 +95,15 @@ def preprocess():
 	print "Adding start and end time elements to the JSON.";
 	import addStartAndEndTimes;
 	addStartAndEndTimes.run(parsedXMLFilename,daysfilename,startandendtimesjsonfilename);
+	tempJSONObj = jsonHelper.getJSONObjectFromFile(startandendtimesjsonfilename);
 
+	# Add "no_parking" element to JSON, true if "no parking" exists in description, false otherwise.
+	print "Adding no parking boolean to JSON.";
+	import findNoParkingPhrase;
+	findNoParkingPhrase.run(startandendtimesjsonfilename,noparkingjsonfilename);
+	tempJSONObj = jsonHelper.getJSONObjectFromFile(noparkingjsonfilename);
+
+	
 	# return latest JSON object
 	return tempJSONObj;
 
