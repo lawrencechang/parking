@@ -9,7 +9,7 @@ def convertCSVtoJSON(csvfilename, jsonfilename):
 	jsonfile = open(jsonfilename, 'w');
 	#samplefile = open(samplefilename, 'w');
 
-	fieldnames = ("borough","order","sequence","mutcd","direction","arrow","x","y","description");
+	fieldnames = ("y","x","borough","order","sequence","mutcd","direction","arrow","xx","yy","description");
 	reader = csv.DictReader( csvfile, fieldnames)
 	counter = 0;
 	dictlist = [];

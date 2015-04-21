@@ -4,7 +4,8 @@
 # Produce output
 
 # filenames
-csvfilename = "C:\Users\Lawrence\Documents\parking\data\Parking_Regulation_WSG84.csv";
+#csvfilename = "C:\Users\Lawrence\Documents\parking\data\Parking_Regulation_WSG84.csv";
+csvfilename = "C:\Users\Lawrence\Documents\parking\data\Parking_Regulation_WSG84_fwtools.csv";
 jsonfilename = "C:\Users\Lawrence\Documents\parking\data\Parking.json";
 arrowfilename = "C:\Users\Lawrence\Documents\parking\data\Parking_cleanarrow.json";
 timefilename = "C:\Users\Lawrence\Documents\parking\data\Parking_cleanarrow_cleantime.json";
@@ -20,6 +21,10 @@ plaintextperiodsfilename = "C:\Users\Lawrence\Documents\parking\data\Parking_pla
 
 startandendtimesjsonfilename = "C:\Users\Lawrence\Documents\parking\data\Parking_startend.json";
 noparkingjsonfilename = "C:\Users\Lawrence\Documents\parking\data\Parking_startend_noparking.json";
+noparkingindexfilename = "C:\Users\Lawrence\Documents\parking\data\Parking_no_parking_index.pickle";
+startendtimeindexfilename = "C:\Users\Lawrence\Documents\parking\data\Parking_start_end_index.pickle";
+intersectionindexfilename = "C:\Users\Lawrence\Documents\parking\data\Parking_intersection_index.pickle";
+htmlfilename = "C:\Users\Lawrence\Documents\parking\src\www\No_parking.html";
 
 outputfilename = "C:\Users\Lawrence\Documents\parking\data\Parking_clean_all.json";
 
@@ -103,7 +108,18 @@ def preprocess():
 	findNoParkingPhrase.run(startandendtimesjsonfilename,noparkingjsonfilename);
 	tempJSONObj = jsonHelper.getJSONObjectFromFile(noparkingjsonfilename);
 
+	# Create index files to get the entries that meet both our criteria
+	print "Creating index files for no_parking and startTime and endTime existence.";
+	import indexUtility;
+	indexUtility.noParkingIndecesPickle(noparkingjsonfilename,noparkingindexfilename);
+	indexUtility.startEndTimesIndecesPickle(noparkingjsonfilename,startendtimeindexfilename);
+	indexUtility.intersection(noparkingindexfilename,startendtimeindexfilename,intersectionindexfilename);
 	
+	# Create HTML file that'll put this info onto a Google Maps view
+	print "Createing HTML file to display data.";
+	import googleMapsCreate;
+	googleMapsCreate.createHTML(intersectionindexfilename,noparkingjsonfilename,htmlfilename);
+
 	# return latest JSON object
 	return tempJSONObj;
 
