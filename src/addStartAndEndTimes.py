@@ -45,6 +45,67 @@ def run(xmlFilename,inputJSONFilename,outputJSONFilename):
 
 	return outputJSONList;
 
+def runXMLFileList(plaintextFilesListFilename,inputJSONFilename,outputJSONFilename):
+	# We'll have to go through the input JSON the same way, line by line.
+	# Depending on how the line number modulos with 500, give it a new XML
+
+	import json;
+	inputJSONFile = open(inputJSONFilename, 'r');
+	outputJSONFile = open(outputJSONFilename, 'w');
+	inputJSON = json.load(inputJSONFile);
+
+	outputJSONList = [];
+	startTime = "";
+	endTime = "";
+
+	# Pre parse all XMLs, store in list
+	# Makes it easier to just assign to a variable and use repeatedly
+	print 'Parsing all XML files.'
+	plaintextFilenames = open(plaintextFilesListFilename,'r');
+	xmlAlreadyParsedList = [];
+	xmlFilenamesList = [];
+	import parseXML;
+	for filename in plaintextFilenames:
+		# Remove newline from filename
+		#parsedXMLList.append(parseXML.parse(filename.rstrip('\n')+".xml"));
+		xmlAlreadyParsedList.append(False);
+		xmlFilenamesList.append(filename.rstrip('\n')+".xml");
+
+	# Loop through the entire input JSON file
+	parsedXML = None;
+	for index,line in enumerate(inputJSON):
+		#print 'index of inputJSON: '+str(index);
+		# WARNING - magic number
+		# Also, integer truncation shortcut. Maybe ensure using floor or something...
+		fileIndex = index / 500;
+		if xmlAlreadyParsedList[fileIndex]:
+			None;
+		else:
+			print 'Parsing file: '+str(fileIndex);
+			xmlAlreadyParsedList[fileIndex] = True;
+			parsedXML = parseXML.parse(xmlFilenamesList[fileIndex]);
+			print '   Parsed file '+str(fileIndex);
+
+		lineNumber = index % 500;
+
+		if (parseXML.hasLine(parsedXML,lineNumber)):
+			if (parseXML.hasTwoTimes(parsedXML,lineNumber)):
+				(startTime,endTime) = parseXML.getTwoTimes(parsedXML,lineNumber);
+		#else:
+		#	break;
+
+		# Add times to output JSON
+		line['startTime'] = startTime;
+		line['endTime'] = endTime;
+		outputJSONList.append(line);
+
+		# reset times
+		startTime = "";
+		endTime = "";
+
+	json.dump(outputJSONList,outputJSONFile);
+	outputJSONFile.close();
+
 if __name__ == '__main__':
 	xmlFilename = "";
 	inputJSONFilename = "";

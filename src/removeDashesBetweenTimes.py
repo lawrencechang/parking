@@ -75,8 +75,8 @@ def run(inputfilename, outputfilename):
 
 	data = json.load(jsonfile);
 
-	times_regexes = ([times_AM_AM,times_AM_PM,times_PM_AM,times_PM_PM,
-					times_AM_none,times_none_AM,times_PM_none,times_none_PM]);
+	times_regexes = ([times_AM_AM,times_AM_PM,times_PM_AM,times_PM_PM]);
+	#times_regexes_with_none = ([times_AM_none,times_none_AM,times_PM_none,times_none_PM]);
 
 	outputjsonlist = [];
 
@@ -87,6 +87,28 @@ def run(inputfilename, outputfilename):
 			matchobj = re.search(current_regex,description,no_case);
 			if not(matchobj is None):
 				description = re.sub(current_regex,'\g<1> \g<2>',description,no_case);
+		# Test individually for the four cases that have a "none" AM or PM
+		# AM, none
+		current_regex = times_AM_none;
+		matchobj = re.search(current_regex,description,no_case);
+		if not(matchobj is None):
+			description = re.sub(current_regex,'\g<1> \g<2>AM',description,no_case);
+		# none, AM
+		current_regex = times_none_AM;
+		matchobj = re.search(current_regex,description,no_case);
+		if not(matchobj is None):
+			description = re.sub(current_regex,'\g<1>AM \g<2>',description,no_case);
+		# PM, none
+		current_regex = times_PM_none;
+		matchobj = re.search(current_regex,description,no_case);
+		if not(matchobj is None):
+			description = re.sub(current_regex,'\g<1> \g<2>PM',description,no_case);
+		# none, PM
+		current_regex = times_none_PM;
+		matchobj = re.search(current_regex,description,no_case);
+		if not(matchobj is None):
+			description = re.sub(current_regex,'\g<1>PM \g<2>',description,no_case);
+
 		line['description'] = description;
 		outputjsonlist.append(line);
 

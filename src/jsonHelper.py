@@ -10,4 +10,7 @@ def getJSONObjectFromFile(jsonFilename):
 def getNumEntries(jsonObject):
 	return len(jsonObject);
 
+if __name__ == '__main__':
+	filename = '..\data\Parking_cleanarrow_cleantime_cleandays.json';
+	print 'count is: '+getNumEntries(getJSONObjectFromFile(filename));
 	

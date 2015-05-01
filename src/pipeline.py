@@ -31,6 +31,8 @@ outputfilename = "C:\Users\Lawrence\Documents\parking\data\Parking_clean_all.jso
 import jsonHelper;
 import time;
 skip = True;
+skipNLP = True;
+skipParse = True;
 
 def preprocess():
 	start = time.time();
@@ -92,15 +94,24 @@ def preprocess():
 		addPeriods.addPeriods(plaintext100samplefilename,plaintext100periodsfilename);
 
 	# Run descriptions through Stanford Core NLP parser
-	# I would like to automate it, but I'd rather not spend too much time trying to get
-	# that right. I'll just manually do it
-	parsedXMLFilename = "C:\Users\Lawrence\Documents\stanford-corenlp-full-2015-01-30\Parking_plaintext_sample500_periods.txt.xml";
+	#parsedXMLFilename = "C:\Users\Lawrence\Documents\stanford-corenlp-full-2015-01-30\Parking_plaintext_sample500_periods.txt.xml";
+	# Call the parser...
+	fileList = "fileList.txt";
+	filesDir = "..\data\plaintextChunkFiles\\";
+	if not skipNLP:
+		print "Calling Stanford Core NLP Parser...";
+		import callStanfordCoreNLPParser;
+		#callStanfordCoreNLPParser.run(plaintext500periodsfilename);
+		callStanfordCoreNLPParser.runChunk(plaintextperiodsfilename,outputDir=filesDir,fileListFilename=fileList);
+		callStanfordCoreNLPParser.runFilelist(fileListFilename=fileList,outputDir=filesDir);
 
-	# Add "start" and "end" time elements to the JSON
-	print "Adding start and end time elements to the JSON.";
-	import addStartAndEndTimes;
-	addStartAndEndTimes.run(parsedXMLFilename,daysfilename,startandendtimesjsonfilename);
-	tempJSONObj = jsonHelper.getJSONObjectFromFile(startandendtimesjsonfilename);
+	if not skipParse:
+		# Add "start" and "end" time elements to the JSON
+		print "Adding start and end time elements to the JSON.";
+		import addStartAndEndTimes;
+		#addStartAndEndTimes.run(parsedXMLFilename,daysfilename,startandendtimesjsonfilename);
+		addStartAndEndTimes.runXMLFileList(filesDir+fileList,daysfilename,startandendtimesjsonfilename);
+		tempJSONObj = jsonHelper.getJSONObjectFromFile(startandendtimesjsonfilename);
 
 	# Add "no_parking" element to JSON, true if "no parking" exists in description, false otherwise.
 	print "Adding no parking boolean to JSON.";

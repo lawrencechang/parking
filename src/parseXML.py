@@ -21,18 +21,9 @@ def parse(xmlFilename):
 def hasLine(parsedXML,lineNumber):
 	root = parsedXML;
 
-	# This code searches manually, but we can use shortcuts
-	# "document" is the 0th element of root, sentences is the 0th element of 
 	sentenceCounter = 0;
 	for document in root.findall('document'):
 		for sentences in document.findall('sentences'):
-			# Iterative search
-			# for sentence in sentences.findall('sentences'):
-			# 	if sentenceCounter == lineNumber:
-			# 		return true;
-			# 	sentenceCounter = sentenceCounter + 1;
-
-			# Direct index search
 			try:
 				sentence = sentences[lineNumber];
 				return True;

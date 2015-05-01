@@ -46,3 +46,6 @@ Temporary Items
 data
 *.pyc
 src/www
+parking
+old
+stanford-corenlp-full-2015-01-30
