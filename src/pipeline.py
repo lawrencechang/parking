@@ -114,7 +114,7 @@ def preprocess():
 		tempJSONObj = jsonHelper.getJSONObjectFromFile(startandendtimesjsonfilename);
 
 	# Add "no_parking" element to JSON, true if "no parking" exists in description, false otherwise.
-	print "Adding no parking boolean to JSON.";
+	print "Adding no parking, no stopping, no standing boolean to JSON.";
 	import findNoParkingPhrase;
 	findNoParkingPhrase.run(startandendtimesjsonfilename,noparkingjsonfilename);
 	tempJSONObj = jsonHelper.getJSONObjectFromFile(noparkingjsonfilename);
