@@ -8,6 +8,10 @@
 # Second line - all the indeces, separate by white space
 # Or maybe, just pickle
 
+# Also do "no standing" and "no stopping",
+# since those are simply more restrictive versions of "no parking"
+# Although they have significant meaning in their own right,
+# for the purposes of parking, they are equivalent to "no parking".
 def noParkingIndecesPickle(inputJSONFilename,outputIndecesFilename):
 	import json;
 	inputJSONFile = open(inputJSONFilename, 'r');
@@ -19,8 +23,10 @@ def noParkingIndecesPickle(inputJSONFilename,outputIndecesFilename):
 	indexList = [];
 
 	for line in inputJSON:
-		if line['no_parking'] == 'true':
-			indexCounter = indexCounter + 1;
+		if (line['no_parking'] == 'true' or 
+			line['no_standing'] == 'true' or 
+			line['no_stopping'] == 'true'):
+			#indexCounter = indexCounter + 1;
 			indexList.append(line['id']);
 
 	import cPickle;
@@ -52,7 +58,7 @@ def intersection(firstIndexFilename,secondIndexFilename,outputIndexFilename):
 	intersection = set(firstIndeces).intersection(secondIndeces);
 	cPickle.dump(intersection,open(outputIndexFilename,'w'));
 
-
+# Generic type of output file, but this is unnecessary. I'm living in python.
 def noParkingIndecesUniversal(inputJSONFilename,outputIndecesFilename):
 	import json;
 	inputJSONFile = open(inputJSONFilename, 'r');

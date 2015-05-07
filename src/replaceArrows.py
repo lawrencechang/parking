@@ -15,7 +15,7 @@ def replaceArrows(jsonfilename, outputfilename):
 	no_case = re.I;
 	# Regular expression
 	arrows_regex = r'<-+>';
-	replacement = 'ARROW_BOTH_DIRECTION';
+	replacement = ' ARROW_BOTH_DIRECTION ';
 
 	outputjsonlist = [];
 

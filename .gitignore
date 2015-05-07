@@ -48,4 +48,9 @@ data
 src/www
 parking
 old
-stanford-corenlp-full-2015-01-30
+stanford-corenlp-full-*
+src/config.py
+downloads_only
+
+# Emacs leftovers
+*~

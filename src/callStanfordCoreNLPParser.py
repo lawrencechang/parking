@@ -2,7 +2,7 @@
 
 # java -cp "*" -Xmx2g edu.stanford.nlp.pipeline.StanfordCoreNLP -annotators tokenize,ssplit,pos,lemma,ner,parse,dcoref -file input.txt
 
-def run(inputFilename):
+def run(classPath,inputFilename):
 	from subprocess import call;
 	# returnCode = (call([
 	# 	"java",
@@ -11,24 +11,23 @@ def run(inputFilename):
 	# 	"-file","..\data\\"+inputFilename]));
 	parser = "edu.stanford.nlp.pipeline.StanfordCoreNLP";
 	annotators = "-annotators tokenize,ssplit,pos,lemma,ner,parse";
-	returnCode = (call("java -cp \"..\stanford-corenlp-full-2015-01-30\*\" -Xmx2g "+parser+" "+annotators+" -file "+inputFilename,shell=True));
+	#returnCode = (call("java -cp \"..\stanford-corenlp-full-2015-01-30\*\" -Xmx2g "+parser+" "+annotators+" -file "+inputFilename,shell=True));
+	returnCode = (call("java -cp "+classPath+" -Xmx2g "+parser+" "+annotators+" -file "+inputFilename,shell=True));
 	print "Return code: "+str(returnCode);
 	return returnCode;
 
-def runFilelist(fileListFilename,
-	outputDir="..\data\plaintextChunkFiles\\"):
+def runFilelist(classPath,fileListFilename,outputDir):
 	from subprocess import call;
 	parser = "edu.stanford.nlp.pipeline.StanfordCoreNLP";
 	annotators = "-annotators tokenize,ssplit,pos,lemma,ner,parse";
-	returnCode = (call("java -cp \"..\stanford-corenlp-full-2015-01-30\*\" -Xmx2g "
+	#returnCode = (call("java -cp \"..\stanford-corenlp-full-2015-01-30\*\" -Xmx2g "
+	returnCode = (call("java -cp "+classPath+" -Xmx2g "
 		+parser+" "+annotators+" -filelist "+outputDir+fileListFilename
 		+" -outputDirectory "+outputDir,shell=True));
 	print "Return code: "+str(returnCode);
 	return returnCode;
 
-def runChunk(inputFilename,chunkSize=500,
-	outputDir="..\data\plaintextChunkFiles\\",
-	fileListFilename="fileList.txt"):
+def runChunk(inputFilename,chunkSize,outputDir,fileListFilename):
 	# Break file into multiple files, each with chunkSize number of data points
 	# Keep a list of the file names
 	# Call "run" on each of the files
@@ -39,8 +38,9 @@ def runChunk(inputFilename,chunkSize=500,
 
 	# Delete folder with files from previous run
 	import shutil;
-	shutil.rmtree(outputDir);
 	import os;
+	if os.path.exists(outputDir):
+		shutil.rmtree(outputDir);
 	if not os.path.exists(outputDir):
 		os.makedirs(outputDir);
 	

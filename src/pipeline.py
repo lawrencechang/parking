@@ -4,41 +4,70 @@
 # Produce output
 
 # filenames
-#csvfilename = "C:\Users\Lawrence\Documents\parking\data\Parking_Regulation_WSG84.csv";
-csvfilename = "C:\Users\Lawrence\Documents\parking\data\Parking_Regulation_WSG84_fwtools.csv";
-jsonfilename = "C:\Users\Lawrence\Documents\parking\data\Parking.json";
-arrowfilename = "C:\Users\Lawrence\Documents\parking\data\Parking_cleanarrow.json";
-timefilename = "C:\Users\Lawrence\Documents\parking\data\Parking_cleanarrow_cleantime.json";
-daysfilename = "C:\Users\Lawrence\Documents\parking\data\Parking_cleanarrow_cleantime_cleandays.json";
-#periodsfilename = "C:\Users\Lawrence\Documents\parking\data\Parking_cleanarrow_cleantime_cleandays_periods.json";
-plaintextfilename = "C:\Users\Lawrence\Documents\parking\data\Parking_plaintext.txt";
-plaintext500samplefilename = "C:\Users\Lawrence\Documents\parking\data\Parking_plaintext_sample500.txt";
-plaintext500periodsfilename = "C:\Users\Lawrence\Documents\parking\data\Parking_plaintext_sample500_periods.txt";
-plaintext100samplefilename = "C:\Users\Lawrence\Documents\parking\data\Parking_plaintext_sample100.txt";
-plaintext100periodsfilename = "C:\Users\Lawrence\Documents\parking\data\Parking_plaintext_sample100_periods.txt";
+import config;
+if config.system == 'windows':
+	print 'Using Windows filenames...';
+	csvfilename = "..\data\Parking_Regulation_WSG84_fwtools.csv";
+	jsonfilename = "..\data\Parking.json";
+	arrowfilename = "..\data\Parking_cleanarrow.json";
+	timefilename = "..\data\Parking_cleanarrow_cleantime.json";
+	daysfilename = "..\data\Parking_cleanarrow_cleantime_cleandays.json";
+	plaintextfilename = "..\data\Parking_plaintext.txt";
+	plaintext500samplefilename = "..\data\Parking_plaintext_sample500.txt";
+	plaintext500periodsfilename = "..\data\Parking_plaintext_sample500_periods.txt";
+	plaintext100samplefilename = "..\data\Parking_plaintext_sample100.txt";
+	plaintext100periodsfilename = "..\data\Parking_plaintext_sample100_periods.txt";
+	plaintextperiodsfilename = "..\data\Parking_plaintext_periods.txt";
+	filesDir = "..\data\plaintextChunkFiles\\";
+	stanfordNLPclasspath="\"..\stanford-corenlp-full-2015-01-30\*\"";
+	startandendtimesjsonfilename = "..\data\Parking_startend.json";
+	noparkingjsonfilename = "..\data\Parking_startend_noparking.json";
+	noparkingindexfilename = "..\data\Parking_no_parking_index.pickle";
+	startendtimeindexfilename = "..\data\Parking_start_end_index.pickle";
+	intersectionindexfilename = "..\data\Parking_intersection_index.pickle";
+	htmlfileDir="..\src\www\\";
+	htmlfilename = "..\src\www\No_parking.html";
 
-plaintextperiodsfilename = "C:\Users\Lawrence\Documents\parking\data\Parking_plaintext_periods.txt";
+	outputfilename = "..\data\Parking_clean_all.json";
+elif config.system == 'mac':
+	print 'Using Mac filenames...';
+	csvfilename = "../data/Parking_Regulation_Shapefile_converted.csv";
+	jsonfilename = "../data/Parking.json";
+	arrowfilename = "../data/Parking_cleanarrow.json";
+	timefilename = "../data/Parking_cleanarrow_cleantime.json";
+	daysfilename = "../data/Parking_cleanarrow_cleantime_cleandays.json";
+	plaintextfilename = "../data/Parking_plaintext.txt";
+	plaintext500samplefilename = "../data/Parking_plaintext_sample500.txt";
+	plaintext500periodsfilename = "../data/Parking_plaintext_sample500_periods.txt";
+	plaintext100samplefilename = "../data/Parking_plaintext_sample100.txt";
+	plaintext100periodsfilename = "../data/Parking_plaintext_sample100_periods.txt";
+	plaintextperiodsfilename = "../data/Parking_plaintext_periods.txt";
+	filesDir = "../data/plaintextChunkFiles/";
+	stanfordNLPclasspath="\"../stanford-corenlp-full-2015-04-20/*\"";
+	startandendtimesjsonfilename = "../data/Parking_startend.json";
+	noparkingjsonfilename = "../data/Parking_startend_noparking.json";
+	noparkingindexfilename = "../data/Parking_no_parking_index.pickle";
+	startendtimeindexfilename = "../data/Parking_start_end_index.pickle";
+	intersectionindexfilename = "../data/Parking_intersection_index.pickle";
+	htmlfileDir="../src/www/";
+	htmlfilename = "../src/www/No_parking.html";
 
-startandendtimesjsonfilename = "C:\Users\Lawrence\Documents\parking\data\Parking_startend.json";
-noparkingjsonfilename = "C:\Users\Lawrence\Documents\parking\data\Parking_startend_noparking.json";
-noparkingindexfilename = "C:\Users\Lawrence\Documents\parking\data\Parking_no_parking_index.pickle";
-startendtimeindexfilename = "C:\Users\Lawrence\Documents\parking\data\Parking_start_end_index.pickle";
-intersectionindexfilename = "C:\Users\Lawrence\Documents\parking\data\Parking_intersection_index.pickle";
-htmlfilename = "C:\Users\Lawrence\Documents\parking\src\www\No_parking.html";
-
-outputfilename = "C:\Users\Lawrence\Documents\parking\data\Parking_clean_all.json";
+	outputfilename = "../data/Parking_clean_all.json";
 
 import jsonHelper;
 import time;
-skip = True;
+skipPreprocess = True;
 skipNLP = True;
 skipParse = True;
+skipIndex = True;
 
 def preprocess():
 	start = time.time();
 	tempfilename = "temp";
 
-	if not skip:
+	tempJSONObj = "";
+
+	if not skipPreprocess:
 		# CSV to JSON
 		print 'Converting from CSV to JSON.';
 		import convertCSVtoJSONList as convertCtoJ;
@@ -97,13 +126,12 @@ def preprocess():
 	#parsedXMLFilename = "C:\Users\Lawrence\Documents\stanford-corenlp-full-2015-01-30\Parking_plaintext_sample500_periods.txt.xml";
 	# Call the parser...
 	fileList = "fileList.txt";
-	filesDir = "..\data\plaintextChunkFiles\\";
 	if not skipNLP:
 		print "Calling Stanford Core NLP Parser...";
 		import callStanfordCoreNLPParser;
 		#callStanfordCoreNLPParser.run(plaintext500periodsfilename);
-		callStanfordCoreNLPParser.runChunk(plaintextperiodsfilename,outputDir=filesDir,fileListFilename=fileList);
-		callStanfordCoreNLPParser.runFilelist(fileListFilename=fileList,outputDir=filesDir);
+		callStanfordCoreNLPParser.runChunk(plaintextperiodsfilename,outputDir=filesDir,fileListFilename=fileList,chunkSize=500);
+		callStanfordCoreNLPParser.runFilelist(classPath=stanfordNLPclasspath,fileListFilename=fileList,outputDir=filesDir);
 
 	if not skipParse:
 		# Add "start" and "end" time elements to the JSON
@@ -113,23 +141,24 @@ def preprocess():
 		addStartAndEndTimes.runXMLFileList(filesDir+fileList,daysfilename,startandendtimesjsonfilename);
 		tempJSONObj = jsonHelper.getJSONObjectFromFile(startandendtimesjsonfilename);
 
-	# Add "no_parking" element to JSON, true if "no parking" exists in description, false otherwise.
-	print "Adding no parking, no stopping, no standing boolean to JSON.";
-	import findNoParkingPhrase;
-	findNoParkingPhrase.run(startandendtimesjsonfilename,noparkingjsonfilename);
-	tempJSONObj = jsonHelper.getJSONObjectFromFile(noparkingjsonfilename);
+	if not skipIndex:
+		# Add "no_parking" element to JSON, true if "no parking" exists in description, false otherwise.
+		print "Adding no parking, no stopping, no standing boolean to JSON.";
+		import findNoParkingPhrase;
+		findNoParkingPhrase.run(startandendtimesjsonfilename,noparkingjsonfilename);
+		tempJSONObj = jsonHelper.getJSONObjectFromFile(noparkingjsonfilename);
 
-	# Create index files to get the entries that meet both our criteria
-	print "Creating index files for no_parking and startTime and endTime existence.";
-	import indexUtility;
-	indexUtility.noParkingIndecesPickle(noparkingjsonfilename,noparkingindexfilename);
-	indexUtility.startEndTimesIndecesPickle(noparkingjsonfilename,startendtimeindexfilename);
-	indexUtility.intersection(noparkingindexfilename,startendtimeindexfilename,intersectionindexfilename);
+		# Create index files to get the entries that meet both our criteria
+		print "Creating index files for no_parking and startTime and endTime existence.";
+		import indexUtility;
+		indexUtility.noParkingIndecesPickle(noparkingjsonfilename,noparkingindexfilename);
+		indexUtility.startEndTimesIndecesPickle(noparkingjsonfilename,startendtimeindexfilename);
+		indexUtility.intersection(noparkingindexfilename,startendtimeindexfilename,intersectionindexfilename);
 	
 	# Create HTML file that'll put this info onto a Google Maps view
-	print "Createing HTML file to display data.";
+	print "Creating HTML file to display data.";
 	import googleMapsCreate;
-	googleMapsCreate.createHTML(intersectionindexfilename,noparkingjsonfilename,htmlfilename);
+	googleMapsCreate.createHTML(intersectionindexfilename,noparkingjsonfilename,htmlfileDir,htmlfilename);
 
 	# return latest JSON object
 	return tempJSONObj;
