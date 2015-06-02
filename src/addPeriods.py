@@ -14,8 +14,8 @@ def addPeriods(inputfilename, outputfilename):
 
 def addPeriodIfThereIsntOne(inputString):
 	if inputString.endswith('.\n'):
-		return inputString;
-	return inputString[:-1]+'.\n';
+		return inputString.rstrip('.\n')+' .\n';
+	return inputString[:-1]+' .\n';
 
 if __name__ == '__main__':
 	inputfilename = "";

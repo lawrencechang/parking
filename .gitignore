@@ -51,6 +51,9 @@ old
 stanford-corenlp-full-*
 src/config.py
 downloads_only
+config
+report materials
+test/results
 
 # Emacs leftovers
 *~

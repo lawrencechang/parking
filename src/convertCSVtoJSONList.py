@@ -9,7 +9,9 @@ def convertCSVtoJSON(csvfilename, jsonfilename):
 	jsonfile = open(jsonfilename, 'w');
 	#samplefile = open(samplefilename, 'w');
 
-	fieldnames = ("y","x","borough","order","sequence","mutcd","direction","arrow","xx","yy","description");
+	fieldnames = ("y","x","objectid","borough","order",
+		"sequence","mutcd","distance","direction",
+		"arrow","xx","yy","description");
 	reader = csv.DictReader( csvfile, fieldnames)
 	counter = 0;
 	dictlist = [];
@@ -29,8 +31,32 @@ def convertCSVtoJSON(csvfilename, jsonfilename):
 	#json.dump(dictlistsample,samplefile);
 	#samplefile.close();
 
+def trim(inputCSVFilename,outputCSVFilename,trimSize):
+	import csv;
+	inputCSVFile = open(inputCSVFilename, 'r');
+	outputCSVFile = open(outputCSVFilename, 'w');
+	fieldnames = ("y","x","objectid","borough","order",
+		"sequence","mutcd","distance","direction",
+		"arrow","xx","yy","description");	
+	reader = csv.DictReader(inputCSVFile, fieldnames);
+	writer = csv.DictWriter(outputCSVFile, fieldnames);
+	counter = 0;
+	dictlist = [];
+	dictlistsample = [];
+	for row in reader:
+		if counter <= trimSize:
+			writer.writerow(row);
+		else:
+			break;
+		counter = counter + 1;
+
+	inputCSVFile.close();
+	outputCSVFile.close();
+
+
 if __name__ == '__main__':
 	csvfilename = "C:\Users\Lawrence\Documents\parking\data\Parking_Regulation_WSG84.csv";
 	jsonfilename = "C:\Users\Lawrence\Documents\parking\data\Parking_Regulation_WSG84.json";
 	#samplefilename = "C:\Users\Lawrence\Documents\parking\data\Parking_Regulation_WSG84_sample.json";
 	convertCSVtoJSON(csvfilename,jsonfilename);
+	

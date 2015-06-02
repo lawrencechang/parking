@@ -46,46 +46,20 @@ def hasTwoTimes(parsedXML,lineNumber):
 							if timex.get('type') == 'TIME':
 								timeCounter = timeCounter + 1;
 			except IndexError:
-				return false;
+				return False;
 	if timeCounter == 2:
 		return True;
 	return False;
 
-def hasTwoTimesDirect(parsedXML,lineNumber):
+# Instead of looking simply for two instances of the TIME element,
+# we're going to look for two UNIQUE ones. 
+# For example, if there's three time elements of 10am, 2pm, and 2pm,
+# then this function will return True because there are only two
+# unique ones.
+# Potential for incorrectly 
+def hasTwoTimesUnique(parsedXML,lineNumber):
 	root = parsedXML;
-	timeCounter = 0;
-	documentIndex = 0;
-	sentencesIndex = 0;
-	tokensIndex = 0;
-	try:
-		tokens = root[documentIndex][sentencesIndex][lineNumber][tokensIndex];
-		for token in tokens.findall('token'):
-			for timex in token.findall('Timex'):
-				if timex.get('type') == 'TIME':
-					timeCounter = timeCounter + 1;
-		if timeCounter == 2:
-			return True;
-		return False;
-	except IndexError:
-		return False;
-
-	return False;
-
-def getFirstTime(parsedXML,lineNumber):
-	(first,second) = getTwoTimes(parsedXML,lineNumber);
-	return first;
-
-def getSecondTime(parsedXML,lineNumber):
-	(first,second) = getTwoTimes(parsedXML,lineNumber);
-	return second;
-
-# return a tuple containing the start and end times
-def getTwoTimes(parsedXML,lineNumber):
-	root = parsedXML;
-	timeCounter = 0;
-	firstTime = None;
-	secondTime = None;
-
+	timeDict = {};
 	for document in root.findall('document'):
 		for sentences in document.findall('sentences'):
 			try:
@@ -94,18 +68,61 @@ def getTwoTimes(parsedXML,lineNumber):
 					for token in tokens.findall('token'):
 						for timex in token.findall('Timex'):
 							if timex.get('type') == 'TIME':
-								if timeCounter == 0:
-									firstTime = timex.text;
-									timeCounter = timeCounter + 1;
-								elif timeCounter == 1:
-									secondTime = timex.text;
-									timeCounter = timeCounter + 1;
-
+								time = timex.text;
+								timeDict[time] = True;
 			except IndexError:
-				continue;
-	
-	return (firstTime,secondTime);
+				return False;
+	if len(timeDict) == 2:
+		return True;
+	return False;
 
+# return a tuple containing the start and end times
+def getTwoTimes(parsedXML,lineNumber,debug=False):
+	if debug == False:
+		None;
+	else:
+		print "debug is True.";
+		print "lineNumber is: "+str(lineNumber);
+	root = parsedXML;
+	timeDict = {};
+	# How many different time's we've seen
+	timeCounter = 0;
+	for document in root.findall('document'):
+		for sentences in document.findall('sentences'):
+			try:
+				sentence = sentences[lineNumber];
+				for tokens in sentence.findall('tokens'):
+					for token in tokens.findall('token'):
+						if debug:
+							for word in token.findall('word'):
+								print "token: "+word.text;
+						for timex in token.findall('Timex'):
+							if timex.get('type') == 'TIME':
+								# the time is the dictinoary key
+								time = timex.text;
+								if not time in timeDict:
+									timeDict[time] = timeCounter;
+									timeCounter = timeCounter + 1;
+								if debug:
+									print "time: "+time;
+			except IndexError:
+				print "IndexError in getTwoTimes!";
+				continue;
+
+	if debug:
+		for key,value in timeDict.iteritems():
+			print key+" "+str(value);
+
+	# Assumes times are in order int he dicionary.
+	# Pretty big assumption.
+	return (getKeyAtIndex(timeDict,0),getKeyAtIndex(timeDict,1));
+
+# Given a dictionary and a timeCounter as a value, find the key that has it
+def getKeyAtIndex(dictionary,index):
+	for key in dictionary.keys():
+		if dictionary[key] == index:
+			return key;
+	return None;
 
 if __name__ == '__main__':
 	
@@ -115,6 +132,7 @@ if __name__ == '__main__':
 	# 3 lines
 	#xmlfilename = "C:\Users\Lawrence\Documents\stanford-corenlp-full-2015-01-30\sample_plaintext.txt.xml";
 	# 100 real descriptions
+	##
 	xmlfilename = "C:\Users\Lawrence\Documents\stanford-corenlp-full-2015-01-30\Parking_plaintext_sample100_periods.txt.xml";
 
 	tree = ET.parse(xmlfilename);

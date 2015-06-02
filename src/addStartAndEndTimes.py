@@ -58,9 +58,7 @@ def runXMLFileList(plaintextFilesListFilename,inputJSONFilename,outputJSONFilena
 	startTime = "";
 	endTime = "";
 
-	# Pre parse all XMLs, store in list
-	# Makes it easier to just assign to a variable and use repeatedly
-	print 'Parsing all XML files.'
+	# Lists to keep track of parsed XMLs
 	plaintextFilenames = open(plaintextFilesListFilename,'r');
 	xmlAlreadyParsedList = [];
 	xmlFilenamesList = [];
@@ -81,18 +79,16 @@ def runXMLFileList(plaintextFilesListFilename,inputJSONFilename,outputJSONFilena
 		if xmlAlreadyParsedList[fileIndex]:
 			None;
 		else:
-			print 'Parsing file: '+str(fileIndex);
+			#print 'Parsing file: '+str(fileIndex);
 			xmlAlreadyParsedList[fileIndex] = True;
 			parsedXML = parseXML.parse(xmlFilenamesList[fileIndex]);
-			print '   Parsed file '+str(fileIndex);
+			#print '   Parsed file '+str(fileIndex);
 
 		lineNumber = index % 500;
 
 		if (parseXML.hasLine(parsedXML,lineNumber)):
-			if (parseXML.hasTwoTimes(parsedXML,lineNumber)):
+			if (parseXML.hasTwoTimesUnique(parsedXML,lineNumber)):
 				(startTime,endTime) = parseXML.getTwoTimes(parsedXML,lineNumber);
-		#else:
-		#	break;
 
 		# Add times to output JSON
 		line['startTime'] = startTime;
@@ -102,6 +98,24 @@ def runXMLFileList(plaintextFilesListFilename,inputJSONFilename,outputJSONFilena
 		# reset times
 		startTime = "";
 		endTime = "";
+
+		# debugging...
+		# if index <= 49:
+		# 	print 'index: '+str(index);
+		# 	print 'lineNumber: '+str(lineNumber);
+		# 	print 'fileIndex: '+str(fileIndex);
+		# 	print 'file name: '+str(xmlFilenamesList[fileIndex]);
+		# 	print 'description: '+line['description'];
+		# 	if (parseXML.hasLine(parsedXML,lineNumber)):
+		# 		if (parseXML.hasTwoTimesUnique(parsedXML,lineNumber)):
+		# 			print 'Met criteria for start and end time...';
+		# 			debug = True;
+		# 			(startTime,endTime) = parseXML.getTwoTimes(parsedXML,lineNumber,debug=debug);
+		# 	print 'startTime: '+startTime+', endTime: '+endTime;
+
+		# 	startTime = "";
+		# 	endTime = "";
+
 
 	json.dump(outputJSONList,outputJSONFile);
 	outputJSONFile.close();

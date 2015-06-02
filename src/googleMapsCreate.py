@@ -30,6 +30,7 @@ def createHTML(indexFilename,jsonFilename,outputDir,outputFilename,limit=10000):
 		outputFile.write(varFront+str(counter)+varMiddle+firstCoord+","+secondCoord+varEnd+"\n");
 
 		if limit > 0 and counter >= limit:
+			print "WARNING - number of data points limited to "+str(limit)+".";
 			break;
 
 	firstCounter = counter;

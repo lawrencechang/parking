@@ -4,7 +4,9 @@
 # Produce output
 
 # filenames
-import config;
+import sys;
+sys.path.append('../');
+from config import config;
 if config.system == 'windows':
 	print 'Using Windows filenames...';
 	csvfilename = "..\data\Parking_Regulation_WSG84_fwtools.csv";
@@ -32,15 +34,18 @@ if config.system == 'windows':
 elif config.system == 'mac':
 	print 'Using Mac filenames...';
 	csvfilename = "../data/Parking_Regulation_Shapefile_converted.csv";
+	csvTrimFilename = "../data/Parking_Regulation_Shapefile_trim.csv";
+	csvTrimSaveFilename = "../data/Parking_Regulation_Shapefile_trim_save.csv";
 	jsonfilename = "../data/Parking.json";
+	cleanHoursFilename = "../data/Parking_cleanhours.json";
 	arrowfilename = "../data/Parking_cleanarrow.json";
 	timefilename = "../data/Parking_cleanarrow_cleantime.json";
 	daysfilename = "../data/Parking_cleanarrow_cleantime_cleandays.json";
 	plaintextfilename = "../data/Parking_plaintext.txt";
 	plaintext500samplefilename = "../data/Parking_plaintext_sample500.txt";
 	plaintext500periodsfilename = "../data/Parking_plaintext_sample500_periods.txt";
-	plaintext100samplefilename = "../data/Parking_plaintext_sample100.txt";
-	plaintext100periodsfilename = "../data/Parking_plaintext_sample100_periods.txt";
+	plaintext600samplefilename = "../data/Parking_plaintext_sample600.txt";
+	plaintext600periodsfilename = "../data/Parking_plaintext_sample600_periods.txt";
 	plaintextperiodsfilename = "../data/Parking_plaintext_periods.txt";
 	filesDir = "../data/plaintextChunkFiles/";
 	stanfordNLPclasspath="\"../stanford-corenlp-full-2015-04-20/*\"";
@@ -56,29 +61,45 @@ elif config.system == 'mac':
 
 import jsonHelper;
 import time;
-skipPreprocess = True;
-skipNLP = True;
-skipParse = True;
-skipIndex = True;
-
+skipTrim = True;
+skipPreprocess = False;
+skipNLP = False;
+skipParse = False;
+skipIndex = False;
 def preprocess():
 	start = time.time();
 	tempfilename = "temp";
 
 	tempJSONObj = "";
-
+	if not skipTrim:
+		print 'Trimming original CSV to a smaller size.';
+		trimSize = 600;
+		import convertCSVtoJSONList as convertCtoJ;
+		convertCtoJ.trim(csvfilename,csvTrimFilename,trimSize);
+		import shutil;
+		shutil.copyfile(csvTrimFilename,csvTrimSaveFilename);
+	else:
+		import shutil;
+		shutil.copyfile(csvfilename,csvTrimFilename);
 	if not skipPreprocess:
 		# CSV to JSON
 		print 'Converting from CSV to JSON.';
 		import convertCSVtoJSONList as convertCtoJ;
-		convertCtoJ.convertCSVtoJSON(csvfilename,jsonfilename);
+		convertCtoJ.convertCSVtoJSON(csvTrimFilename,jsonfilename);
 		tempJSONObj = jsonHelper.getJSONObjectFromFile(jsonfilename);
 		numEntries = jsonHelper.getNumEntries(tempJSONObj);
+
+		print 'Spelling out hour numbers at sentence beginnings.';
+		import replaceHourBeginnings;
+		replaceHourBeginnings.cleanHours(jsonfilename,cleanHoursFilename);
+		tempJSONObj = jsonHelper.getJSONObjectFromFile(cleanHoursFilename);
+		numEntriesHours = jsonHelper.getNumEntries(tempJSONObj);
+		assert numEntries == numEntriesHours;
 
 		# Clean up arrows
 		print 'Cleaning up arrows.';
 		import replaceArrows;
-		replaceArrows.replaceArrows(jsonfilename,arrowfilename);
+		replaceArrows.replaceArrows(cleanHoursFilename,arrowfilename);
 		tempJSONObj = jsonHelper.getJSONObjectFromFile(arrowfilename);
 		numEntriesArrow = jsonHelper.getNumEntries(tempJSONObj);
 		assert numEntries == numEntriesArrow;
@@ -119,8 +140,8 @@ def preprocess():
 		jsonToPlaintext.jsonToPlaintextLineCount(daysfilename,plaintext500samplefilename,500);
 		addPeriods.addPeriods(plaintext500samplefilename,plaintext500periodsfilename);
 		print 'Writing descriptions to plaintext file, 100 entries.';
-		jsonToPlaintext.jsonToPlaintextLineCount(daysfilename,plaintext100samplefilename,100);
-		addPeriods.addPeriods(plaintext100samplefilename,plaintext100periodsfilename);
+		jsonToPlaintext.jsonToPlaintextLineCount(daysfilename,plaintext600samplefilename,600);
+		addPeriods.addPeriods(plaintext600samplefilename,plaintext600periodsfilename);
 
 	# Run descriptions through Stanford Core NLP parser
 	#parsedXMLFilename = "C:\Users\Lawrence\Documents\stanford-corenlp-full-2015-01-30\Parking_plaintext_sample500_periods.txt.xml";
@@ -129,15 +150,15 @@ def preprocess():
 	if not skipNLP:
 		print "Calling Stanford Core NLP Parser...";
 		import callStanfordCoreNLPParser;
-		#callStanfordCoreNLPParser.run(plaintext500periodsfilename);
 		callStanfordCoreNLPParser.runChunk(plaintextperiodsfilename,outputDir=filesDir,fileListFilename=fileList,chunkSize=500);
+		#callStanfordCoreNLPParser.runChunk(plaintext600periodsfilename,outputDir=filesDir,fileListFilename=fileList,chunkSize=500);
 		callStanfordCoreNLPParser.runFilelist(classPath=stanfordNLPclasspath,fileListFilename=fileList,outputDir=filesDir);
 
 	if not skipParse:
 		# Add "start" and "end" time elements to the JSON
 		print "Adding start and end time elements to the JSON.";
 		import addStartAndEndTimes;
-		#addStartAndEndTimes.run(parsedXMLFilename,daysfilename,startandendtimesjsonfilename);
+		#addStartAndEndTimes.runXMLFileList(filesDir+fileList,daysfilename,startandendtimesjsonfilename);
 		addStartAndEndTimes.runXMLFileList(filesDir+fileList,daysfilename,startandendtimesjsonfilename);
 		tempJSONObj = jsonHelper.getJSONObjectFromFile(startandendtimesjsonfilename);
 

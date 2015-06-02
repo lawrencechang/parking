@@ -54,7 +54,10 @@ def runChunk(inputFilename,chunkSize,outputDir,fileListFilename):
 	filenameList.append(currentFilename);
 
 	for index,line in enumerate(inputFile):
-		if (index + 1) % 500 == 0:
+		# special case
+		if index == 0:
+			None;
+		elif (index % 500) == 0:
 			currentFile.close();
 			fileCounter = fileCounter + 1;
 			currentFilename = outputDir+filenamePrefix+str(fileCounter)+filenameExtension;

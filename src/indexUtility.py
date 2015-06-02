@@ -19,14 +19,12 @@ def noParkingIndecesPickle(inputJSONFilename,outputIndecesFilename):
 
 	outputfile = open(outputIndecesFilename,'w');
 
-	indexCounter = 0;
 	indexList = [];
 
 	for line in inputJSON:
 		if (line['no_parking'] == 'true' or 
 			line['no_standing'] == 'true' or 
 			line['no_stopping'] == 'true'):
-			#indexCounter = indexCounter + 1;
 			indexList.append(line['id']);
 
 	import cPickle;
@@ -39,12 +37,10 @@ def startEndTimesIndecesPickle(inputJSONFilename,outputIndecesFilename):
 
 	outputfile = open(outputIndecesFilename,'w');
 
-	indexCounter = 0;
 	indexList = [];
 
 	for line in inputJSON:
 		if line['startTime'] != '' and line['endTime'] != '':
-			indexCounter = indexCounter + 1;
 			indexList.append(line['id']);
 
 	import cPickle;
