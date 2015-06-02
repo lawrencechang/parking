@@ -3,6 +3,11 @@
 # This is to be used for Stanford NLP Parser processing.
 
 def jsonToPlaintext(inputfilename, outputfilename):
+	debug = True;
+	if debug:
+		print "inputfilename: "+inputfilename;
+		print "outputfilename: "+outputfilename;
+
 	import json;
 	jsonfile = open(inputfilename, 'r');
 	data = json.load(jsonfile);
@@ -10,6 +15,7 @@ def jsonToPlaintext(inputfilename, outputfilename):
 	outputfile = open(outputfilename, 'w');
 
 	for entry in data:
+		print "Description: "+entry['description'];
 		outputfile.write(entry['description']+'\n');
 
 	outputfile.close();

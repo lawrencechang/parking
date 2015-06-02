@@ -5,20 +5,22 @@
 
 # filenames
 import sys;
-sys.path.append('../');
-from config import config;
-if config.system == 'windows':
+# windows
+if sys.platform == 'win32':
 	print 'Using Windows filenames...';
 	csvfilename = "..\data\Parking_Regulation_WSG84_fwtools.csv";
+	csvTrimFilename = "..\data\Parking_Regulation_Shapefile_trim.csv";
+	csvTrimSaveFilename = "..\data\Parking_Regulation_Shapefile_trim_save.csv";
 	jsonfilename = "..\data\Parking.json";
+	cleanHoursFilename = "..\data\Parking_cleanhours.json";
 	arrowfilename = "..\data\Parking_cleanarrow.json";
 	timefilename = "..\data\Parking_cleanarrow_cleantime.json";
 	daysfilename = "..\data\Parking_cleanarrow_cleantime_cleandays.json";
 	plaintextfilename = "..\data\Parking_plaintext.txt";
 	plaintext500samplefilename = "..\data\Parking_plaintext_sample500.txt";
 	plaintext500periodsfilename = "..\data\Parking_plaintext_sample500_periods.txt";
-	plaintext100samplefilename = "..\data\Parking_plaintext_sample100.txt";
-	plaintext100periodsfilename = "..\data\Parking_plaintext_sample100_periods.txt";
+	plaintext600samplefilename = "..\data\Parking_plaintext_sample600.txt";
+	plaintext600periodsfilename = "..\data\Parking_plaintext_sample600_periods.txt";
 	plaintextperiodsfilename = "..\data\Parking_plaintext_periods.txt";
 	filesDir = "..\data\plaintextChunkFiles\\";
 	stanfordNLPclasspath="\"..\stanford-corenlp-full-2015-01-30\*\"";
@@ -31,7 +33,8 @@ if config.system == 'windows':
 	htmlfilename = "..\src\www\No_parking.html";
 
 	outputfilename = "..\data\Parking_clean_all.json";
-elif config.system == 'mac':
+# Mac
+elif sys.platform == 'darwin':
 	print 'Using Mac filenames...';
 	csvfilename = "../data/Parking_Regulation_Shapefile_converted.csv";
 	csvTrimFilename = "../data/Parking_Regulation_Shapefile_trim.csv";
@@ -61,7 +64,7 @@ elif config.system == 'mac':
 
 import jsonHelper;
 import time;
-skipTrim = True;
+skipTrim = False;
 skipPreprocess = False;
 skipNLP = False;
 skipParse = False;

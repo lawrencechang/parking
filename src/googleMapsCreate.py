@@ -23,6 +23,7 @@ def createHTML(indexFilename,jsonFilename,outputDir,outputFilename,limit=10000):
 	import cPickle;
 	indeces = cPickle.load(open(indexFilename,'r'));
 
+	counter = 0;
 	for counter,index in enumerate(indeces):
 		#print "index: "+str(index);
 		firstCoord = str(inputJSON[index]['y']);
