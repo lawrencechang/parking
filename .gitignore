@@ -54,6 +54,9 @@ downloads_only
 config
 report materials
 test/results
+packages
+playground
+documentation
 
 # Emacs leftovers
 *~

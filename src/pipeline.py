@@ -29,13 +29,14 @@ if sys.platform == 'win32':
 	noparkingindexfilename = "..\data\Parking_no_parking_index.pickle";
 	startendtimeindexfilename = "..\data\Parking_start_end_index.pickle";
 	intersectionindexfilename = "..\data\Parking_intersection_index.pickle";
-	htmlfileDir="..\src\www\\";
-	htmlfilename = "..\src\www\No_parking.html";
+	htmlfileDir="..\data\www\\";
+	htmlfilename = "..\data\www\No_parking.html";
 
 	outputfilename = "..\data\Parking_clean_all.json";
 # Mac
 elif sys.platform == 'darwin':
 	print 'Using Mac filenames...';
+	dataDirectory = "../data/";
 	csvfilename = "../data/Parking_Regulation_Shapefile_converted.csv";
 	csvTrimFilename = "../data/Parking_Regulation_Shapefile_trim.csv";
 	csvTrimSaveFilename = "../data/Parking_Regulation_Shapefile_trim_save.csv";
@@ -54,21 +55,28 @@ elif sys.platform == 'darwin':
 	stanfordNLPclasspath="\"../stanford-corenlp-full-2015-04-20/*\"";
 	startandendtimesjsonfilename = "../data/Parking_startend.json";
 	noparkingjsonfilename = "../data/Parking_startend_noparking.json";
+	cleanLongTimesJSONFilename = "../data/Parking_startend_noparking_cleanlongtimes.json";
+	validDaysJSONFilename = "../data/Parking_startend_noparking_cleanlongtimes_validdays.json";
 	noparkingindexfilename = "../data/Parking_no_parking_index.pickle";
 	startendtimeindexfilename = "../data/Parking_start_end_index.pickle";
 	intersectionindexfilename = "../data/Parking_intersection_index.pickle";
-	htmlfileDir="../src/www/";
-	htmlfilename = "../src/www/No_parking.html";
+	htmlfileDir="../data/www/";
+	htmlfilename = "No_parking.html";
 
 	outputfilename = "../data/Parking_clean_all.json";
 
 import jsonHelper;
 import time;
-skipTrim = False;
-skipPreprocess = False;
-skipNLP = False;
-skipParse = False;
-skipIndex = False;
+# To run the entire thing, set skipTrim to True, all else to False.
+skipTrim = True;
+skipPreprocess = True;
+skipNLP = True;
+skipParse = True;
+skipIndex = True;
+skipCleanLongTimes = True;
+skipAddValidDays = True;
+skipTimeSlots = False;
+
 def preprocess():
 	start = time.time();
 	tempfilename = "temp";
@@ -92,6 +100,7 @@ def preprocess():
 		tempJSONObj = jsonHelper.getJSONObjectFromFile(jsonfilename);
 		numEntries = jsonHelper.getNumEntries(tempJSONObj);
 
+		# This didn't seem to be solve the parser bug
 		print 'Spelling out hour numbers at sentence beginnings.';
 		import replaceHourBeginnings;
 		replaceHourBeginnings.cleanHours(jsonfilename,cleanHoursFilename);
@@ -105,7 +114,12 @@ def preprocess():
 		replaceArrows.replaceArrows(cleanHoursFilename,arrowfilename);
 		tempJSONObj = jsonHelper.getJSONObjectFromFile(arrowfilename);
 		numEntriesArrow = jsonHelper.getNumEntries(tempJSONObj);
-		assert numEntries == numEntriesArrow;
+		try:
+			assert numEntries == numEntriesArrow;
+		except AssertionError as e:
+			#print "AssertionError: "+e;
+			print "numEntries: "+str(numEntries);
+			print "numEntriesArrow: "+str(numEntriesArrow);
 
 		# Clean up times
 		print 'Cleaning up times.';
@@ -165,13 +179,13 @@ def preprocess():
 		addStartAndEndTimes.runXMLFileList(filesDir+fileList,daysfilename,startandendtimesjsonfilename);
 		tempJSONObj = jsonHelper.getJSONObjectFromFile(startandendtimesjsonfilename);
 
-	if not skipIndex:
 		# Add "no_parking" element to JSON, true if "no parking" exists in description, false otherwise.
-		print "Adding no parking, no stopping, no standing boolean to JSON.";
-		import findNoParkingPhrase;
-		findNoParkingPhrase.run(startandendtimesjsonfilename,noparkingjsonfilename);
+		print "Adding phrases to JSON.";
+		import findPhrases;
+		findPhrases.run(startandendtimesjsonfilename,noparkingjsonfilename);
 		tempJSONObj = jsonHelper.getJSONObjectFromFile(noparkingjsonfilename);
 
+	if not skipIndex:
 		# Create index files to get the entries that meet both our criteria
 		print "Creating index files for no_parking and startTime and endTime existence.";
 		import indexUtility;
@@ -179,10 +193,33 @@ def preprocess():
 		indexUtility.startEndTimesIndecesPickle(noparkingjsonfilename,startendtimeindexfilename);
 		indexUtility.intersection(noparkingindexfilename,startendtimeindexfilename,intersectionindexfilename);
 	
+	if not skipCleanLongTimes:
+		print "Clean weird time formats."
+		import cleanLongTimeEntries;
+		cleanLongTimeEntries.run(noparkingjsonfilename,cleanLongTimesJSONFilename);
+
+	if not skipAddValidDays:
+		print "Adding fields that describe which days of the week are valid.";
+		startValidDays = time.time();
+		import validDays;
+		validDays.run(cleanLongTimesJSONFilename,validDaysJSONFilename,dataDirectory);
+		endValidDays = time.time();
+		print "["+str(endValidDays-startValidDays)+" seconds]";
+
+	if not skipTimeSlots:
+		print "Creating HTMLs for all time slots.";
+		startTimeSlots = time.time();
+		import createTimeSlotHTMLs;
+		createTimeSlotHTMLs.run(validDaysJSONFilename,htmlfileDir);
+		endTimeSlots = time.time();
+		print "["+str(endTimeSlots-startTimeSlots)+" seconds]";
+
 	# Create HTML file that'll put this info onto a Google Maps view
 	print "Creating HTML file to display data.";
 	import googleMapsCreate;
-	googleMapsCreate.createHTML(intersectionindexfilename,noparkingjsonfilename,htmlfileDir,htmlfilename);
+	import jsonHelper;
+	jsonObject = jsonHelper.getJSONObjectFromFile(cleanLongTimesJSONFilename);
+	googleMapsCreate.createHTML(intersectionindexfilename,jsonObject,htmlfileDir,htmlfilename);
 
 	# return latest JSON object
 	return tempJSONObj;

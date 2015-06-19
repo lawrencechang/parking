@@ -1,14 +1,16 @@
 # Create the HTML that'll display the "no parking" locations
 
-def createHTML(indexFilename,jsonFilename,outputDir,outputFilename,limit=10000):
-	import shutil;
-	import os;
-	if os.path.exists(outputDir):
-		shutil.rmtree(outputDir);
-	if not os.path.exists(outputDir):
-		os.makedirs(outputDir);
+def createHTML(indexFilename,jsonObject,outputDir,outputFilename,limit=10000):
+	# import shutil;
+	# import os;
+	# if os.path.exists(outputDir):
+	# 	shutil.rmtree(outputDir);
+	# if not os.path.exists(outputDir):
+	# 	os.makedirs(outputDir);
+	# currentDirectory = os.getcwd();
+	# print "In googleMapsCreate, the current working dir is: "+currentDirectory;
 
-	outputFile = open(outputFilename,'w');
+	outputFile = open(outputDir+outputFilename,'w');
 	import googleMapsJavascriptStrings as gStrings;
 	outputFile.write(gStrings.top);
 
@@ -18,10 +20,13 @@ def createHTML(indexFilename,jsonFilename,outputDir,outputFilename,limit=10000):
   	varEnd = ");";
 
   	import json;
-  	inputJSONFile = open(jsonFilename, 'r');
-	inputJSON = json.load(inputJSONFile);
+  	#print "In googleMapsCreate, jsonFilename: "+jsonFilename;
+  	#inputJSONFile = open(jsonFilename, 'r');
+	#inputJSON = json.load(inputJSONFile);
+	inputJSON = jsonObject;
 	import cPickle;
-	indeces = cPickle.load(open(indexFilename,'r'));
+	#print "In googleMapsCreate, outputDir+indexFilename: "+outputDir+indexFilename;
+	indeces = cPickle.load(open(outputDir+indexFilename,'r'));
 
 	counter = 0;
 	for counter,index in enumerate(indeces):

@@ -15,6 +15,16 @@ top = (
       }
     </style>
     <script src=\"https://maps.googleapis.com/maps/api/js?v=3.exp&signed_in=true\"></script>
+    
+    <script>
+      var script = '<script type="text/javascript" src="../../packages/js-marker-clusterer/src/markerclusterer';
+      if (document.location.search.indexOf('compiled') !== -1) {
+        script += '_compiled';
+      }
+      script += '.js"><' + '/script>';
+      document.write(script);
+    </script>
+
     <script>
 function initialize() {"""
 );
@@ -26,11 +36,14 @@ middle = (
   }
   var map = new google.maps.Map(document.getElementById(\'map-canvas\'), mapOptions);
 
-  var marker = ["""
+  var markers = ["""
 );
 
 bottom = (
 """];
+
+  var markerCluster = new MarkerClusterer(map, markers);
+
 }
 
 google.maps.event.addDomListener(window, \'load\', initialize);

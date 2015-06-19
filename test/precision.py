@@ -36,6 +36,14 @@ def test(indexFilename,jsonFilename,numSamples = 10):
 		print "No Parking: "+inputJSON[i]['no_parking'];
 		print "No Standing: "+inputJSON[i]['no_standing'];
 		print "No Stopping: "+inputJSON[i]['no_stopping'];
+		print "Anytime: "+inputJSON[i]['anytime'];
+		print "Monday: "+inputJSON[i]['monday'];
+		print "Tuesday: "+inputJSON[i]['tuesday'];
+		print "Wednesday: "+inputJSON[i]['wednesday'];
+		print "Thursday: "+inputJSON[i]['thursday'];
+		print "Friday: "+inputJSON[i]['friday'];
+		print "Saturday: "+inputJSON[i]['saturday'];
+		print "Sunday: "+inputJSON[i]['sunday'];
 
 	return inputJSON;
 

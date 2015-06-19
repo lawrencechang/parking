@@ -20,8 +20,9 @@ elif config.system == 'mac':
 # Skips
 # True
 # False
-skipStatistics = True;
-skipPrecision = True;
+skipStatistics = False;
+skipPrecision = False;
+skipRandomSample = True;
 
 import precision;
 # 1. Get statistics
@@ -61,9 +62,10 @@ if not skipPrecision:
 
 # 4. Print descriptions for 50 random guys
 # Used for sampling, getting the number of criteria fitting (verified by hand)
-numSamplesCoverage = 50;
-print "Sampling "+str(numSamplesCoverage)+" descriptions.";
-inputJSON = precision.printDescriptionsWithInspection(noparkingjsonfilename,numSamplesCoverage);
+if not skipRandomSample:
+	numSamplesCoverage = 50;
+	print "Sampling "+str(numSamplesCoverage)+" descriptions.";
+	inputJSON = precision.printDescriptionsWithInspection(noparkingjsonfilename,numSamplesCoverage);
 
 if not inputJSON is None:
 	print "Variable \"inputJSON\" is in your workspace now.";

@@ -15,7 +15,7 @@ def jsonToPlaintext(inputfilename, outputfilename):
 	outputfile = open(outputfilename, 'w');
 
 	for entry in data:
-		print "Description: "+entry['description'];
+		#print "Description: "+entry['description'];
 		outputfile.write(entry['description']+'\n');
 
 	outputfile.close();
