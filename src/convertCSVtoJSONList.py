@@ -13,23 +13,18 @@ def convertCSVtoJSON(csvfilename, jsonfilename):
 		"sequence","mutcd","distance","direction",
 		"arrow","xx","yy","description");
 	reader = csv.DictReader( csvfile, fieldnames)
-	counter = 0;
+	#counter = 0;
 	dictlist = [];
-	dictlistsample = [];
-	for row in reader:
+	for counter,row in enumerate(reader):
 		# Adding an extra field called 'id', which is a unique identifier
 	    row['id']=counter;
-	    # Create a sampling
-	    if counter < 100:
-	    	dictlistsample.append(row);
 	    dictlist.append(row);
-	    counter = counter + 1;
+	    #counter = counter + 1;
 
 	# write files
 	json.dump(dictlist,jsonfile);
 	jsonfile.close();
-	#json.dump(dictlistsample,samplefile);
-	#samplefile.close();
+
 
 def trim(inputCSVFilename,outputCSVFilename,trimSize):
 	import csv;
@@ -40,15 +35,13 @@ def trim(inputCSVFilename,outputCSVFilename,trimSize):
 		"arrow","xx","yy","description");	
 	reader = csv.DictReader(inputCSVFile, fieldnames);
 	writer = csv.DictWriter(outputCSVFile, fieldnames);
-	counter = 0;
+	#counter = 0;
 	dictlist = [];
-	dictlistsample = [];
-	for row in reader:
+	for counter,row in enumerate(reader):
 		if counter <= trimSize:
 			writer.writerow(row);
 		else:
 			break;
-		counter = counter + 1;
 
 	inputCSVFile.close();
 	outputCSVFile.close();

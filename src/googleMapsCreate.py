@@ -1,6 +1,6 @@
 # Create the HTML that'll display the "no parking" locations
 
-def createHTML(indexFilename,jsonObject,outputDir,outputFilename,limit=10000):
+def createHTML(indexFilename,jsonObject,outputDir,outputFilename,indexFileDir,limit=10000):
 	# import shutil;
 	# import os;
 	# if os.path.exists(outputDir):
@@ -20,13 +20,10 @@ def createHTML(indexFilename,jsonObject,outputDir,outputFilename,limit=10000):
   	varEnd = ");";
 
   	import json;
-  	#print "In googleMapsCreate, jsonFilename: "+jsonFilename;
-  	#inputJSONFile = open(jsonFilename, 'r');
-	#inputJSON = json.load(inputJSONFile);
 	inputJSON = jsonObject;
 	import cPickle;
 	#print "In googleMapsCreate, outputDir+indexFilename: "+outputDir+indexFilename;
-	indeces = cPickle.load(open(outputDir+indexFilename,'r'));
+	indeces = cPickle.load(open(indexFileDir+indexFilename,'r'));
 
 	counter = 0;
 	for counter,index in enumerate(indeces):
@@ -46,14 +43,18 @@ def createHTML(indexFilename,jsonObject,outputDir,outputFilename,limit=10000):
 	# create marker entries using the variables
 	# NOTE - remove last comma
 	marFront = "new google.maps.Marker({position: myLatlng";
-	marEnd = ", map: map, title: \'Hello World!\'}),\n";
-	marEndNoComma = ", map: map, title: \'Hello World!\'})\n";
-	for counter,index in enumerate(indeces):
-		if firstCounter != counter:
-			outputFile.write(marFront+str(counter)+marEnd);
-		else:
-			outputFile.write(marFront+str(counter)+marEndNoComma);
+	marMid = ", map: map, title: ";
+	marEnd = "}),\n";
+	marEndNoComma = "})\n";
 
+	for counter,index in enumerate(indeces):
+		description = inputJSON[index]['description'];
+		indexText = ", index: "+str(index);
+		markerText = json.dumps(description+indexText);
+		if firstCounter != counter:
+			outputFile.write(marFront+str(counter)+marMid+markerText+marEnd);
+		else:
+			outputFile.write(marFront+str(counter)+marMid+markerText+marEndNoComma);
 		if limit > 0 and counter >= limit:
 			break;
 

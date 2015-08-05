@@ -6,8 +6,13 @@
 # Can I assume that if there's an "except xxx-day", then there aren't
 # other day indicators?
 # Perhaps assume, then check for it, and print it out as a warning.
+import findPhrases;
+
 def getValidDaysList(jsonObject):
 	validDaysList = ['sunday','monday','tuesday','wednesday','thursday','friday','saturday'];
+	if jsonObject['anytime'] == 'true':
+		return validDaysList;
+
 	if jsonObject['exceptSunday'] == 'true':
 		validDaysList.remove('sunday');
 		return validDaysList;
@@ -44,6 +49,35 @@ def getValidDaysList(jsonObject):
 		validDaysList.remove('friday');
 	if jsonObject['saturday'] == 'false':
 		validDaysList.remove('saturday');
+
+	# thru handling
+	# If this is true, then there must be at least 2 days found
+	if jsonObject['thru'] == 'true':
+		matchobj = findPhrases.searchThru(jsonObject['description']);
+		if not (matchobj is None):
+			# according to some eye balling, the days are at group index 1 and 11
+			firstDay = matchobj.group(1);
+			secondDay = matchobj.group(11);
+			if firstDay == 'sunday':
+				dayList = ['sunday','monday','tuesday','wednesday','thursday','friday','saturday'];
+			elif firstDay == 'monday':
+				dayList = ['monday','tuesday','wednesday','thursday','friday','saturday','sunday'];
+			elif firstDay == 'tuesday':
+				dayList = ['tuesday','wednesday','thursday','friday','saturday','sunday','monday'];
+			elif firstDay == 'wednesday':
+				dayList = ['wednesday','thursday','friday','saturday','sunday','monday','tuesday'];
+			elif firstDay == 'thursday':
+				dayList = ['thursday','friday','saturday','sunday','monday','tuesday','wednesday'];
+			elif firstDay == 'friday':
+				dayList = ['friday','saturday','sunday','monday','tuesday','wednesday','thursday'];
+			elif firstDay == 'saturday':
+				dayList = ['saturday','sunday','monday','tuesday','wednesday','thursday','friday'];
+			else:
+				dayList = [];
+			for day in dayList:
+				validDaysList.append(day);
+				if day == secondDay:
+					break;
 
 	return validDaysList;
 

@@ -57,11 +57,21 @@ elif sys.platform == 'darwin':
 	noparkingjsonfilename = "../data/Parking_startend_noparking.json";
 	cleanLongTimesJSONFilename = "../data/Parking_startend_noparking_cleanlongtimes.json";
 	validDaysJSONFilename = "../data/Parking_startend_noparking_cleanlongtimes_validdays.json";
+	timeSlotJSONFilename = "../data/Parking_timeslots.json";
+	trimValidDaysJSONFilename = "../data/Parking_validdays_trim.json";
+	trimValidDaysTimeFieldsJSONFilename = "../data/Parking_validdays_timeslots_trim.json"
+	validDaysCSVFilename = "../data/Parking_startend_noparking_cleanlongtimes_validdays.csv";
+	validDaysTimeFieldsCSVFilename = "../data/Parking_validdays_timeslots.csv"
+	geoJSONFilename = "../data/Parking_geojson.json";
+	geoJSONOutputDir = "../data/geojson/";
+	geoJSONMinimalOutputDir = "../data/geojsonMinimal/";
 	noparkingindexfilename = "../data/Parking_no_parking_index.pickle";
 	startendtimeindexfilename = "../data/Parking_start_end_index.pickle";
 	intersectionindexfilename = "../data/Parking_intersection_index.pickle";
 	htmlfileDir="../data/www/";
 	htmlfilename = "No_parking.html";
+	timeSlotIndexFilename = "timeSlotIndexFilenames.pickle";
+	timeSlotIndexDir = "../data/timeSlotIndexFiles/";
 
 	outputfilename = "../data/Parking_clean_all.json";
 
@@ -75,13 +85,19 @@ skipParse = True;
 skipIndex = True;
 skipCleanLongTimes = True;
 skipAddValidDays = True;
-skipTimeSlots = False;
+skipGeoJSONConvert = True;
+skipTimeSlotIndex = False;
+skipTimeSlotHTML = False;
+skipTimeSlotGeoJSON = False;
+skipTimeSlotGeoJSONMinimal = False;
+skipAddTimeFields = False;
+skipTrimInfo = False;
+skipJSONToCSV = False;
 
 def preprocess():
 	start = time.time();
 	tempfilename = "temp";
 
-	tempJSONObj = "";
 	if not skipTrim:
 		print 'Trimming original CSV to a smaller size.';
 		trimSize = 600;
@@ -101,17 +117,19 @@ def preprocess():
 		numEntries = jsonHelper.getNumEntries(tempJSONObj);
 
 		# This didn't seem to be solve the parser bug
+		"""
 		print 'Spelling out hour numbers at sentence beginnings.';
 		import replaceHourBeginnings;
 		replaceHourBeginnings.cleanHours(jsonfilename,cleanHoursFilename);
 		tempJSONObj = jsonHelper.getJSONObjectFromFile(cleanHoursFilename);
 		numEntriesHours = jsonHelper.getNumEntries(tempJSONObj);
 		assert numEntries == numEntriesHours;
+		"""
 
 		# Clean up arrows
 		print 'Cleaning up arrows.';
 		import replaceArrows;
-		replaceArrows.replaceArrows(cleanHoursFilename,arrowfilename);
+		replaceArrows.replaceArrows(jsonfilename,arrowfilename);
 		tempJSONObj = jsonHelper.getJSONObjectFromFile(arrowfilename);
 		numEntriesArrow = jsonHelper.getNumEntries(tempJSONObj);
 		try:
@@ -161,29 +179,24 @@ def preprocess():
 		addPeriods.addPeriods(plaintext600samplefilename,plaintext600periodsfilename);
 
 	# Run descriptions through Stanford Core NLP parser
-	#parsedXMLFilename = "C:\Users\Lawrence\Documents\stanford-corenlp-full-2015-01-30\Parking_plaintext_sample500_periods.txt.xml";
 	# Call the parser...
 	fileList = "fileList.txt";
 	if not skipNLP:
 		print "Calling Stanford Core NLP Parser...";
 		import callStanfordCoreNLPParser;
 		callStanfordCoreNLPParser.runChunk(plaintextperiodsfilename,outputDir=filesDir,fileListFilename=fileList,chunkSize=500);
-		#callStanfordCoreNLPParser.runChunk(plaintext600periodsfilename,outputDir=filesDir,fileListFilename=fileList,chunkSize=500);
 		callStanfordCoreNLPParser.runFilelist(classPath=stanfordNLPclasspath,fileListFilename=fileList,outputDir=filesDir);
 
 	if not skipParse:
 		# Add "start" and "end" time elements to the JSON
 		print "Adding start and end time elements to the JSON.";
 		import addStartAndEndTimes;
-		#addStartAndEndTimes.runXMLFileList(filesDir+fileList,daysfilename,startandendtimesjsonfilename);
 		addStartAndEndTimes.runXMLFileList(filesDir+fileList,daysfilename,startandendtimesjsonfilename);
-		tempJSONObj = jsonHelper.getJSONObjectFromFile(startandendtimesjsonfilename);
 
 		# Add "no_parking" element to JSON, true if "no parking" exists in description, false otherwise.
 		print "Adding phrases to JSON.";
 		import findPhrases;
 		findPhrases.run(startandendtimesjsonfilename,noparkingjsonfilename);
-		tempJSONObj = jsonHelper.getJSONObjectFromFile(noparkingjsonfilename);
 
 	if not skipIndex:
 		# Create index files to get the entries that meet both our criteria
@@ -206,22 +219,77 @@ def preprocess():
 		endValidDays = time.time();
 		print "["+str(endValidDays-startValidDays)+" seconds]";
 
-	if not skipTimeSlots:
+	if not skipGeoJSONConvert:
+		print "Converting JSON to geoJSON.";
+		startGeoJSON = time.time();
+		jsonHelper.convertToGeoJSONFile(validDaysJSONFilename,geoJSONFilename);
+		endGeoJSON = time.time();
+		print "["+str(endGeoJSON-startGeoJSON)+" seconds]";
+
+	import createTimeSlotHTMLs;
+	if not skipTimeSlotIndex:
+		print "Creating index files for all time slots.";
+		startTimeSlots = time.time();
+		createTimeSlotHTMLs.createIndexFiles(validDaysJSONFilename,timeSlotIndexDir,timeSlotIndexFilename);
+		endTimeSlots = time.time();
+		print "["+str(endTimeSlots-startTimeSlots)+" seconds]";
+	else:
+		print "Creating the index file list ONLY.";
+		startTimeSlots = time.time();
+		createTimeSlotHTMLs.createIndexFilesList(timeSlotIndexDir,timeSlotIndexFilename);
+		endTimeSlots = time.time();
+		print "["+str(endTimeSlots-startTimeSlots)+" seconds]";
+	
+	if not skipTimeSlotHTML:
 		print "Creating HTMLs for all time slots.";
 		startTimeSlots = time.time();
-		import createTimeSlotHTMLs;
-		createTimeSlotHTMLs.run(validDaysJSONFilename,htmlfileDir);
+		createTimeSlotHTMLs.createHTMLs(validDaysJSONFilename,htmlfileDir,timeSlotIndexFilename,timeSlotIndexDir);
 		endTimeSlots = time.time();
 		print "["+str(endTimeSlots-startTimeSlots)+" seconds]";
 
-	# Create HTML file that'll put this info onto a Google Maps view
-	print "Creating HTML file to display data.";
-	import googleMapsCreate;
-	import jsonHelper;
-	jsonObject = jsonHelper.getJSONObjectFromFile(cleanLongTimesJSONFilename);
-	googleMapsCreate.createHTML(intersectionindexfilename,jsonObject,htmlfileDir,htmlfilename);
+	if not skipTimeSlotGeoJSON:
+		print "Creating geoJSON files for each time slot.";
+		import createTimeSlotGeoJSONs;
+		start = time.time();
+		createTimeSlotGeoJSONs.createGeoJSONs(geoJSONFilename,geoJSONOutputDir,timeSlotIndexFilename,timeSlotIndexDir,verbose=True);
+		end = time.time();
+		print "["+str(end-start)+" seconds]";
+
+	if not skipTimeSlotGeoJSONMinimal:
+		print "Creating minimal geoJSON files for each time slot.";
+		import createTimeSlotGeoJSONs;
+		start = time.time();
+		createTimeSlotGeoJSONs.createMinimalGeoJSONs(geoJSONFilename,geoJSONMinimalOutputDir,timeSlotIndexFilename,timeSlotIndexDir,verbose=True);
+		end = time.time();
+		print "["+str(end-start)+" seconds]";
+
+	if not skipAddTimeFields:
+		print "Adding the time fields to the JSON. Will make things much bigger...";
+		import addTimeSlots;
+		start = time.time();
+		addTimeSlots.run(timeSlotIndexFilename,timeSlotIndexDir,validDaysJSONFilename,timeSlotJSONFilename);
+		end = time.time();
+		print "["+str(end-start)+" seconds]";
+
+	if not skipTrimInfo:
+		print "Removing most fields except valid days.";
+		import jsonTrim;
+		startTrim = time.time();
+		jsonTrim.trimFieldsValidDaysOnly(timeSlotJSONFilename,trimValidDaysJSONFilename);
+		jsonTrim.trimFieldsValidDaysTimeSlots(timeSlotJSONFilename,trimValidDaysTimeFieldsJSONFilename);
+		endTrim = time.time();
+		print "["+str(endTrim-startTrim)+" seconds]";
+
+	if not skipJSONToCSV:
+		print "Creating CSV from last JSON.";
+		start = time.time();
+		jsonHelper.jsonToCSV(trimValidDaysTimeFieldsJSONFilename,validDaysTimeFieldsCSVFilename);
+		jsonHelper.jsonToCSVChunks(trimValidDaysTimeFieldsJSONFilename,validDaysTimeFieldsCSVFilename,10000);
+		end = time.time();
+		print "["+str(end-start)+" seconds]";
 
 	# return latest JSON object
+	tempJSONObj = jsonHelper.getJSONObjectFromFile(validDaysJSONFilename);
 	return tempJSONObj;
 
 if __name__ == '__main__':

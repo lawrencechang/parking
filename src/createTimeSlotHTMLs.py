@@ -33,8 +33,6 @@
 # 	- Save list to index file, named appropriately
 # 	- Generate HTML with this, giving appropriate name.
 	
-
-
 # - Need a validDays function, which returns a list of the valid days of the week
 # 	- input
 # 		- The JSON line.
@@ -52,17 +50,16 @@ from datetime import *;
 # Math for floor
 from math import floor;
 
-def run(jsonFilename,outputDir,limit=0):
+def createIndexFiles(jsonFilename,outputDir,indexFilenameListFilename):
 	import shutil;
 	import os;
 	if os.path.exists(outputDir):
 		shutil.rmtree(outputDir);
 	if not os.path.exists(outputDir):
 		os.makedirs(outputDir);
-	currentDirectory = os.getcwd();
-	#print "In createTimeSlotHTMLs, the current working dir is: "+currentDirectory;
+	originalDirectory = os.getcwd();
+
 	import cPickle;
-	import googleMapsCreate;
 	import json;
 	jsonFile = open(jsonFilename, 'r');
 	jsonData = json.load(jsonFile);
@@ -70,90 +67,154 @@ def run(jsonFilename,outputDir,limit=0):
 	print "Creating tuples list.";
 	tuplesList = createTuplesList();
 
+	filenameList = [];
 	indexList = None;
+	os.chdir(outputDir);
 	for tupleIndex,tupleInfo in enumerate(tuplesList):
 		print "tupleIndex: "+str(tupleIndex);
 		indexList = [];
 		for jsonIndex,jsonLine in enumerate(jsonData):
 			validDaysList = buildValidDaysList(jsonLine);
 			if ((tupleInfo.dayOfWeek in validDaysList) and
-				(startTimeIsAfterInclusive(jsonLine['startTime'],tupleInfo.startTime)) and
-				(endTimeIsBeforeInclusive(jsonLine['endTime'],tupleInfo.endTime))
+				(startTimeIsAfterInclusive(jsonLine['startTime'],tupleInfo.startTime,False)) and
+				(endTimeIsBeforeInclusive(jsonLine['endTime'],tupleInfo.endTime,False))
 				):
 				indexList.append(jsonIndex);
-		# write indexList to file
-		#print "Writing index file: "+outputDir+tupleInfo.indexFilename;
-		indexFile = open(outputDir+tupleInfo.indexFilename,'w');
+		indexFile = open(tupleInfo.indexFilename,'w');
 		cPickle.dump(indexList,indexFile);
 		indexFile.close();
-		#print "Done writing index file: "+outputDir+tupleInfo.indexFilename;
 
-		# Create HTML file
-		googleMapsCreate.createHTML(tupleInfo.indexFilename,
-			jsonData,outputDir,tupleInfo.htmlFilename,limit=limit);
+		filenameList.append((tupleInfo.indexFilename,tupleInfo.htmlFilename));
 
+	outputFile = open(indexFilenameListFilename,'w');
+	cPickle.dump(filenameList,outputFile);
+	outputFile.close();
+
+	os.chdir(originalDirectory);
+
+def createIndexFilesList(outputDir,indexFilenameListFilename):
+	import shutil;
+	import os;
+	if not os.path.exists(outputDir):
+		os.makedirs(outputDir);
+	originalDirectory = os.getcwd();
+
+	import cPickle;
+	print "Creating tuples list.";
+	tuplesList = createTuplesList();
+
+	filenameList = [];
+	indexList = None;
+	os.chdir(outputDir);
+	for tupleIndex,tupleInfo in enumerate(tuplesList):
+		print "tupleIndex: "+str(tupleIndex);
+		filenameList.append((tupleInfo.indexFilename,tupleInfo.htmlFilename));
+
+	outputFile = open(indexFilenameListFilename,'w');
+	cPickle.dump(filenameList,outputFile);
+	outputFile.close();
+	print "Created index file list: "+indexFilenameListFilename;
+	print "In directory: "+outputDir;	
+	os.chdir(originalDirectory);
+
+def createHTMLs(jsonFilename,outputDir,indexFilenameListFilename,indexFileDir):
+	import cPickle;
+	import jsonHelper;
+	import googleMapsCreate;
+	filenamesList = cPickle.load(open(indexFileDir+indexFilenameListFilename,'r'));
+
+	import shutil;
+	import os;
+	if os.path.exists(outputDir):
+		shutil.rmtree(outputDir);
+	if not os.path.exists(outputDir):
+		os.makedirs(outputDir);
+
+	jsonObject = jsonHelper.getJSONObjectFromFile(jsonFilename);
+	for index,(indexFilename,htmlFilename) in enumerate(filenamesList):
+		print "HTML file: "+str(index)+", "+htmlFilename;
+		googleMapsCreate.createHTML(indexFilename,jsonObject,outputDir,htmlFilename,indexFileDir,0);
 
 def createTuplesList():
 	tuplesList = [];
-
 	numTimeSlotsPerDay = 4 * 24;
 	daysOfWeek = ['sunday','monday','tuesday','wednesday','thursday','friday','saturday'];
 	for dayOfWeek in daysOfWeek:
 		for timeSlotIndex in range(numTimeSlotsPerDay):
-			htmlFilename = dayOfWeek+"TimeSlot"+str(timeSlotIndex)+".html";
-			indexFilename = dayOfWeek+"TimeSlot"+str(timeSlotIndex)+"Index.pickle";
 			(startTime,endTime) = startAndEndTimeFromTimeSlotIndex(timeSlotIndex);
+			startTimeNoColon = startTime.replace(':','');
+			endTimeNoColon = endTime.replace(':','');
+			htmlFilename = dayOfWeek+"TimeSlot"+startTimeNoColon+"-"+endTimeNoColon+".html";
+			indexFilename = dayOfWeek+"TimeSlot"+startTimeNoColon+"-"+endTimeNoColon+"Index.pickle";
 			tuplesList.append(FileInfo(htmlFilename,indexFilename,
 				dayOfWeek,startTime,endTime));
-
 	return tuplesList;
 
 def startAndEndTimeFromTimeSlotIndex(timeSlotIndex):
-	hour = int(floor(timeSlotIndex / 4.0));
-	minute = int(timeSlotIndex%4) * 15;
-	startTime = str(hour)+":"+str(minute)+"";
-	endTime = str(hour)+":"+str(minute+14)+"";
+	hour = str(int(floor(timeSlotIndex / 4.0)));
+	minute = str(int(timeSlotIndex%4) * 15);
+	minutePlus14 = str((int(timeSlotIndex%4) * 15) + 14);
+	if len(hour) == 1:
+		hour = '0'+hour;
+	if len(minute) == 1:
+		minute = '0'+minute;
+	if len(minutePlus14) == 1:
+		print "ERROR - minutePlus14 has only one digit: >"+minutePlus14+"<";
+		raise Exception;
+	startTime = hour+":"+minute+'';
+	endTime = hour+":"+minutePlus14+'';
 	return (startTime,endTime);
 
-def startTimeIsAfterInclusive(baselineTime,newTime):
-	#print "baselineTime: "+baselineTime;
-	#print "newtime: "+newTime;
+def startTimeIsAfterInclusive(baselineTime,newTime,debug=False):
+	if baselineTime == '' or newTime == '':
+		if debug:
+			print 'Error: baselineTime: '+str(baselineTime)+', newTime: '+str(newTime);
+		return False;
 	try:
 		parsedBaselineTime = parse(baselineTime);
 		parsedNewTime = parse(newTime);
 	except:
-		#print "Exception: baselineTime: "+baselineTime+", newTime: "+newTime;
-		parsedBaselineTime = parse("00:00");
-		parsedNewTime = parse("00:00");
+		if debug:
+			print 'Error parsing.'
+			print 'Error: baselineTime: '+str(baselineTime)+', newTime: '+str(newTime);
+		# Can handle this case
+		if baselineTime=='TNI':
+			return False;
+		else:
+			print 'Uncaught exception.'
+			print 'Error: baselineTime: '+str(baselineTime)+', newTime: '+str(newTime);
+		raise;
 	timeDiff = relativedelta(parsedBaselineTime,parsedNewTime);
-	hours = None;
-	minutes = None;
-	seconds = None;
-	hours = 1 if timeDiff.hours == 0 else timeDiff.hours;
-	minutes = 1 if timeDiff.minutes == 0 else timeDiff.minutes;
-	seconds = 1 if timeDiff.seconds == 0 else timeDiff.seconds;
+	if (timeDiff.hours <= 0 and timeDiff.minutes <= 0 and timeDiff.seconds <= 0):
+		return True;
+	else:
+		return False;
 
-	return (True if hours*minutes*seconds >= 0 else False);
-
-def endTimeIsBeforeInclusive(baselineTime,newTime):
-	#print "baselineTime: "+baselineTime;
-	#print "newtime: "+newTime;
+def endTimeIsBeforeInclusive(baselineTime,newTime,debug=False):
+	if baselineTime == '' or newTime == '':
+		if debug:
+			print 'Error: baselineTime: '+str(baselineTime)+', newTime: '+str(newTime);
+		return False;
 	try:
 		parsedBaselineTime = parse(baselineTime);
 		parsedNewTime = parse(newTime);
 	except:
-		print "Exception: baselineTime: "+baselineTime+", newTime: "+newTime;
-		parsedBaselineTime = parse("00:00");
-		parsedNewTime = parse("00:00");
+		if debug:
+			print 'Error parsing.'
+			print 'Error: baselineTime: '+str(baselineTime)+', newTime: '+str(newTime);
+		# Can handle this case
+		if baselineTime=='TNI':
+			return False;
+		else:
+			print 'Uncaught exception.'
+			print 'Error: baselineTime: '+str(baselineTime)+', newTime: '+str(newTime);
+		raise;
+		#return False;
 	timeDiff = relativedelta(parsedBaselineTime,parsedNewTime);
-	hours = None;
-	minutes = None;
-	seconds = None;
-	hours = 1 if timeDiff.hours == 0 else timeDiff.hours;
-	minutes = 1 if timeDiff.minutes == 0 else timeDiff.minutes;
-	seconds = 1 if timeDiff.seconds == 0 else timeDiff.seconds;
-
-	return (True if hours*minutes*seconds < 0 else False);
+	if (timeDiff.hours >= 0 and timeDiff.minutes >= 0 and timeDiff.seconds >= 0):
+		return True;
+	else:
+		return False;
 
 def buildValidDaysList(jsonLine):
 	result = [];

@@ -45,13 +45,12 @@ Temporary Items
 # My own stuff
 data
 *.pyc
-src/www
-parking
+#parking
 old
 stanford-corenlp-full-*
-src/config.py
+#src/config.py
 downloads_only
-config
+#config
 report materials
 test/results
 packages
