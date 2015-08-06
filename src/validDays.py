@@ -79,6 +79,11 @@ def getValidDaysList(jsonObject):
 				if day == secondDay:
 					break;
 
+	# Doesn't seem like it makes sense for a sign to be valid on NO days.
+	# If the validDaysList is empty, return the full thing.
+	if len(validDaysList) == 0:
+		return ['sunday','monday','tuesday','wednesday','thursday','friday','saturday'];
+
 	return validDaysList;
 
 def run(inputJSONFilename,outputJSONFilename,directory):

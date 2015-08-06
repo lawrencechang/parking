@@ -29,7 +29,6 @@ def run(indexFileListFilename,indexFileListDir,inputJSONFilename,outputJSONFilen
 		for hour in hours:
 			for minute in minutes:
 				for index in range(len(data)):
-					#data[index][getFieldName(period,hour,minute)] = 'false';
 					data[index][getFieldName(period,hour,minute)] = 'f';
 
 	# Fill in actual values
@@ -39,10 +38,9 @@ def run(indexFileListFilename,indexFileListDir,inputJSONFilename,outputJSONFilen
 				for day in days:
 					startMin = getStartMin(minute);
 					endMin = getEndMin(minute); 
-					filename = day+'TimeSlot'+hour+startMin+'-'+hour+endMin+'Index.pickle';
+					filename = getFilename(day,period,hour,minute,startMin,endMin);
 					indeces = cPickle.load(open(indexFileListDir+filename,'r'));
 					for index in indeces:
-						#data[index][getFieldName(period,hour,minute)] = 'true';
 						data[index][getFieldName(period,hour,minute)] = 't';
 
 	jsonHelper.writeJSONObjectIntoFile(data,outputJSONFilename);
@@ -71,5 +69,15 @@ def getEndMin(minInt):
 	else:
 		raise Exception('getEndMin function given a minute that was undefined.');
 
+def getFilename(day,period,hour,minute,startMin,endMin):
+	if period == 'am':
+		return day+'TimeSlot'+hour+startMin+'-'+hour+endMin+'Index.pickle';
+	elif period == 'pm':
+		hourPM = str(int(hour)+12);
+		return day+'TimeSlot'+hourPM+startMin+'-'+hourPM+endMin+'Index.pickle';
+	else:
+		raise ValueError('Period is neither am or pm');
+
 def getFieldName(period,hour,minute):
 	return 'time'+hour+getStartMin(minute)+period;
+	

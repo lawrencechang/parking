@@ -98,9 +98,8 @@ def jsonToCSVChunks(jsonFilename,csvFilename,chunkSize=100000):
 		files[i].writerow(keysList);
 
 	for index,row in enumerate(jsonObject):
-		if index == 0:
-			print "first row: "+str(row);
-		#print "index = "+str(index);
+		#if index == 0:
+		#	print "first row: "+str(row);
 		fileNumber = int(math.floor(index / chunkSize));
 		currentFile = files[fileNumber];
 		valuesList = [];

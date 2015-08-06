@@ -23,7 +23,6 @@ def run(xmlFilename,inputJSONFilename,outputJSONFilename):
 	for line in inputJSON:
 		# if the line exists in the XML file, 
 		if (parseXML.hasLine(parsedXML,lineCounter)):
-			#print "lineCounter: "+str(lineCounter);
 			# and if so, if that line contains two times
 			if (parseXML.hasTwoTimes(parsedXML,lineCounter)):
 				# Set the start and end time variables
@@ -48,7 +47,6 @@ def run(xmlFilename,inputJSONFilename,outputJSONFilename):
 def runXMLFileList(plaintextFilesListFilename,inputJSONFilename,outputJSONFilename):
 	# We'll have to go through the input JSON the same way, line by line.
 	# Depending on how the line number modulos with 500, give it a new XML
-
 	import json;
 	inputJSONFile = open(inputJSONFilename, 'r');
 	outputJSONFile = open(outputJSONFilename, 'w');
@@ -72,17 +70,14 @@ def runXMLFileList(plaintextFilesListFilename,inputJSONFilename,outputJSONFilena
 	# Loop through the entire input JSON file
 	parsedXML = None;
 	for index,line in enumerate(inputJSON):
-		#print 'index of inputJSON: '+str(index);
 		# WARNING - magic number
-		# Also, integer truncation shortcut. Maybe ensure using floor or something...
+		# Integer truncation shortcut
 		fileIndex = index / 500;
 		if xmlAlreadyParsedList[fileIndex]:
 			None;
 		else:
-			#print 'Parsing file: '+str(fileIndex);
 			xmlAlreadyParsedList[fileIndex] = True;
 			parsedXML = parseXML.parse(xmlFilenamesList[fileIndex]);
-			#print '   Parsed file '+str(fileIndex);
 
 		lineNumber = index % 500;
 
@@ -99,30 +94,5 @@ def runXMLFileList(plaintextFilesListFilename,inputJSONFilename,outputJSONFilena
 		startTime = "";
 		endTime = "";
 
-		# debugging...
-		# if index <= 49:
-		# 	print 'index: '+str(index);
-		# 	print 'lineNumber: '+str(lineNumber);
-		# 	print 'fileIndex: '+str(fileIndex);
-		# 	print 'file name: '+str(xmlFilenamesList[fileIndex]);
-		# 	print 'description: '+line['description'];
-		# 	if (parseXML.hasLine(parsedXML,lineNumber)):
-		# 		if (parseXML.hasTwoTimesUnique(parsedXML,lineNumber)):
-		# 			print 'Met criteria for start and end time...';
-		# 			debug = True;
-		# 			(startTime,endTime) = parseXML.getTwoTimes(parsedXML,lineNumber,debug=debug);
-		# 	print 'startTime: '+startTime+', endTime: '+endTime;
-
-		# 	startTime = "";
-		# 	endTime = "";
-
-
 	json.dump(outputJSONList,outputJSONFile);
 	outputJSONFile.close();
-
-if __name__ == '__main__':
-	xmlFilename = "";
-	inputJSONFilename = "";
-	outputJSONFilename = "";
-
-	run(xmlFilename,inputJSONFilename,outputJSONFilename);

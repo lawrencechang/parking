@@ -46,6 +46,28 @@ def trim(inputCSVFilename,outputCSVFilename,trimSize):
 	inputCSVFile.close();
 	outputCSVFile.close();
 
+def trimFromIndex(inputCSVFilename,outputCSVFilename,trimSize,startIndex,verbose=False):
+	import csv;
+	inputCSVFile = open(inputCSVFilename, 'r');
+	outputCSVFile = open(outputCSVFilename, 'w');
+	fieldnames = ("y","x","objectid","borough","order",
+		"sequence","mutcd","distance","direction",
+		"arrow","xx","yy","description");	
+	reader = csv.DictReader(inputCSVFile, fieldnames);
+	writer = csv.DictWriter(outputCSVFile, fieldnames);
+	#counter = 0;
+	dictlist = [];
+	for counter,row in enumerate(reader):
+		if counter >= startIndex:
+			if verbose:
+				print "Trimming: counter: "+str(counter);
+			if counter <= (startIndex + trimSize):
+				writer.writerow(row);
+			else:
+				break;
+
+	inputCSVFile.close();
+	outputCSVFile.close();
 
 if __name__ == '__main__':
 	csvfilename = "C:\Users\Lawrence\Documents\parking\data\Parking_Regulation_WSG84.csv";

@@ -30,12 +30,24 @@ def createGeoJSONs(geoJSONFilename,outputDir,indexFilenameListFilename,indexFile
 		properties = {};
 		indeces = cPickle.load(open(indexFileDir+indexFilename,'r'));
 		for index in indeces:
+			# Indeces were created when there was a header row.
+			# Since geojson needs real data for each entry, we had to skip this
+			# row when creating the total geojson file.
+			# See jsonHelper.convertToGeoJSON for details.
+			indexNoHeader = index - 1;
 			try:
-				featureList.append(geoJSONObject['features'][index]);
+				featureList.append(geoJSONObject['features'][indexNoHeader]);
 			except:
 				print "Error."
-				print "index: "+str(index);
-				print "geojson: "+geojson.dumps(geoJSONObject['features'][index]);
+				print "indexNoHeader: "+str(indexNoHeader);
+				print "geoJSONFilename: "+geoJSONFilename;
+				print "outputDir: "+outputDir;
+				print "indexFilenameListFilename: "+indexFilenameListFilename;
+				print "indexFileDir: "+indexFileDir;
+				print "Size of filenamesList: "+str(len(filenamesList));
+				print "Num of indeces: "+str(len(indeces));
+				print "Size of geojson object features: "+str(len(geoJSONObject['features']));
+				print "geojson: "+geojson.dumps(geoJSONObject['features'][indexNoHeader]);
 				raise;
 
 		currentGeoJSONFilename = outputDir+htmlFilename.rstrip('.html')+'.json';
@@ -66,15 +78,17 @@ def createMinimalGeoJSONs(geoJSONFilename,outputDir,indexFilenameListFilename,in
 		properties = {};
 		indeces = cPickle.load(open(indexFileDir+indexFilename,'r'));
 		for index in indeces:
+			# See comment in createGeoJSONs function.
+			indexNoHeader = index - 1;
 			try:
-				currentGeoJSONObject = geoJSONObject['features'][index];
+				currentGeoJSONObject = geoJSONObject['features'][indexNoHeader];
 				geometry = currentGeoJSONObject['geometry'];
 				idNum = currentGeoJSONObject['id']
 				featureList.append(geojson.Feature(geometry=geometry,id=idNum));
 			except:
 				print "Error."
-				print "index: "+str(index);
-				print "geojson: "+geojson.dumps(geoJSONObject['features'][index]);
+				print "indexNoHeader: "+str(indexNoHeader);
+				print "geojson: "+geojson.dumps(geoJSONObject['features'][indexNoHeader]);
 				raise;
 
 		currentGeoJSONFilename = outputDir+htmlFilename.rstrip('.html')+'.json';

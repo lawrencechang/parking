@@ -36,56 +36,56 @@ if sys.platform == 'win32':
 # Mac
 elif sys.platform == 'darwin':
 	print 'Using Mac filenames...';
-	dataDirectory = "../data/";
-	csvfilename = "../data/Parking_Regulation_Shapefile_converted.csv";
-	csvTrimFilename = "../data/Parking_Regulation_Shapefile_trim.csv";
-	csvTrimSaveFilename = "../data/Parking_Regulation_Shapefile_trim_save.csv";
-	jsonfilename = "../data/Parking.json";
-	cleanHoursFilename = "../data/Parking_cleanhours.json";
-	arrowfilename = "../data/Parking_cleanarrow.json";
-	timefilename = "../data/Parking_cleanarrow_cleantime.json";
-	daysfilename = "../data/Parking_cleanarrow_cleantime_cleandays.json";
-	plaintextfilename = "../data/Parking_plaintext.txt";
-	plaintext500samplefilename = "../data/Parking_plaintext_sample500.txt";
-	plaintext500periodsfilename = "../data/Parking_plaintext_sample500_periods.txt";
-	plaintext600samplefilename = "../data/Parking_plaintext_sample600.txt";
-	plaintext600periodsfilename = "../data/Parking_plaintext_sample600_periods.txt";
-	plaintextperiodsfilename = "../data/Parking_plaintext_periods.txt";
-	filesDir = "../data/plaintextChunkFiles/";
+	dataDirectory = "../dataTrim/";
+	csvfilename = dataDirectory+"Parking_Regulation_Shapefile_converted.csv";
+	csvTrimFilename = dataDirectory+"Parking_Regulation_Shapefile_trim.csv";
+	csvTrimSaveFilename = dataDirectory+"Parking_Regulation_Shapefile_trim_save.csv";
+	jsonfilename = dataDirectory+"Parking.json";
+	cleanHoursFilename = dataDirectory+"Parking_cleanhours.json";
+	arrowfilename = dataDirectory+"Parking_cleanarrow.json";
+	timefilename = dataDirectory+"Parking_cleanarrow_cleantime.json";
+	daysfilename = dataDirectory+"Parking_cleanarrow_cleantime_cleandays.json";
+	plaintextfilename = dataDirectory+"Parking_plaintext.txt";
+	plaintext500samplefilename = dataDirectory+"Parking_plaintext_sample500.txt";
+	plaintext500periodsfilename = dataDirectory+"Parking_plaintext_sample500_periods.txt";
+	plaintext600samplefilename = dataDirectory+"Parking_plaintext_sample600.txt";
+	plaintext600periodsfilename = dataDirectory+"Parking_plaintext_sample600_periods.txt";
+	plaintextperiodsfilename = dataDirectory+"Parking_plaintext_periods.txt";
+	filesDir = dataDirectory+"plaintextChunkFiles/";
 	stanfordNLPclasspath="\"../stanford-corenlp-full-2015-04-20/*\"";
-	startandendtimesjsonfilename = "../data/Parking_startend.json";
-	noparkingjsonfilename = "../data/Parking_startend_noparking.json";
-	cleanLongTimesJSONFilename = "../data/Parking_startend_noparking_cleanlongtimes.json";
-	validDaysJSONFilename = "../data/Parking_startend_noparking_cleanlongtimes_validdays.json";
-	timeSlotJSONFilename = "../data/Parking_timeslots.json";
-	trimValidDaysJSONFilename = "../data/Parking_validdays_trim.json";
-	trimValidDaysTimeFieldsJSONFilename = "../data/Parking_validdays_timeslots_trim.json"
-	validDaysCSVFilename = "../data/Parking_startend_noparking_cleanlongtimes_validdays.csv";
-	validDaysTimeFieldsCSVFilename = "../data/Parking_validdays_timeslots.csv"
-	geoJSONFilename = "../data/Parking_geojson.json";
-	geoJSONOutputDir = "../data/geojson/";
-	geoJSONMinimalOutputDir = "../data/geojsonMinimal/";
-	noparkingindexfilename = "../data/Parking_no_parking_index.pickle";
-	startendtimeindexfilename = "../data/Parking_start_end_index.pickle";
-	intersectionindexfilename = "../data/Parking_intersection_index.pickle";
-	htmlfileDir="../data/www/";
+	startandendtimesjsonfilename = dataDirectory+"Parking_startend.json";
+	noparkingjsonfilename = dataDirectory+"Parking_startend_noparking.json";
+	cleanLongTimesJSONFilename = dataDirectory+"Parking_startend_noparking_cleanlongtimes.json";
+	validDaysJSONFilename = dataDirectory+"Parking_startend_noparking_cleanlongtimes_validdays.json";
+	timeSlotJSONFilename = dataDirectory+"Parking_timeslots.json";
+	trimValidDaysJSONFilename = dataDirectory+"Parking_validdays_trim.json";
+	trimValidDaysTimeFieldsJSONFilename = dataDirectory+"Parking_validdays_timeslots_trim.json"
+	validDaysCSVFilename = dataDirectory+"Parking_startend_noparking_cleanlongtimes_validdays.csv";
+	validDaysTimeFieldsCSVFilename = dataDirectory+"Parking_validdays_timeslots.csv"
+	geoJSONFilename = dataDirectory+"Parking_geojson.json";
+	geoJSONOutputDir = dataDirectory+"geojson/";
+	geoJSONMinimalOutputDir = dataDirectory+"geojsonMinimal/";
+	noparkingindexfilename = dataDirectory+"Parking_no_parking_index.pickle";
+	startendtimeindexfilename = dataDirectory+"Parking_start_end_index.pickle";
+	intersectionindexfilename = dataDirectory+"Parking_intersection_index.pickle";
+	htmlfileDir=dataDirectory+"www/";
 	htmlfilename = "No_parking.html";
 	timeSlotIndexFilename = "timeSlotIndexFilenames.pickle";
-	timeSlotIndexDir = "../data/timeSlotIndexFiles/";
+	timeSlotIndexDir = dataDirectory+"timeSlotIndexFiles/";
 
-	outputfilename = "../data/Parking_clean_all.json";
+	outputfilename = dataDirectory+"Parking_clean_all.json";
 
 import jsonHelper;
 import time;
 # To run the entire thing, set skipTrim to True, all else to False.
 skipTrim = True;
-skipPreprocess = True;
-skipNLP = True;
-skipParse = True;
-skipIndex = True;
-skipCleanLongTimes = True;
-skipAddValidDays = True;
-skipGeoJSONConvert = True;
+skipPreprocess = False;
+skipNLP = False;
+skipParse = False;
+skipIndex = False;
+skipCleanLongTimes = False;
+skipAddValidDays = False;
+skipGeoJSONConvert = False;
 skipTimeSlotIndex = False;
 skipTimeSlotHTML = False;
 skipTimeSlotGeoJSON = False;
@@ -100,9 +100,9 @@ def preprocess():
 
 	if not skipTrim:
 		print 'Trimming original CSV to a smaller size.';
-		trimSize = 600;
+		trimSize = 100;
 		import convertCSVtoJSONList as convertCtoJ;
-		convertCtoJ.trim(csvfilename,csvTrimFilename,trimSize);
+		convertCtoJ.trimFromIndex(csvfilename,csvTrimFilename,trimSize,46373);
 		import shutil;
 		shutil.copyfile(csvTrimFilename,csvTrimSaveFilename);
 	else:
@@ -251,7 +251,7 @@ def preprocess():
 		print "Creating geoJSON files for each time slot.";
 		import createTimeSlotGeoJSONs;
 		start = time.time();
-		createTimeSlotGeoJSONs.createGeoJSONs(geoJSONFilename,geoJSONOutputDir,timeSlotIndexFilename,timeSlotIndexDir,verbose=True);
+		createTimeSlotGeoJSONs.createGeoJSONs(geoJSONFilename,geoJSONOutputDir,timeSlotIndexFilename,timeSlotIndexDir,verbose=False);
 		end = time.time();
 		print "["+str(end-start)+" seconds]";
 
@@ -259,7 +259,7 @@ def preprocess():
 		print "Creating minimal geoJSON files for each time slot.";
 		import createTimeSlotGeoJSONs;
 		start = time.time();
-		createTimeSlotGeoJSONs.createMinimalGeoJSONs(geoJSONFilename,geoJSONMinimalOutputDir,timeSlotIndexFilename,timeSlotIndexDir,verbose=True);
+		createTimeSlotGeoJSONs.createMinimalGeoJSONs(geoJSONFilename,geoJSONMinimalOutputDir,timeSlotIndexFilename,timeSlotIndexDir,verbose=False);
 		end = time.time();
 		print "["+str(end-start)+" seconds]";
 
