@@ -7,24 +7,20 @@ def convertCSVtoJSON(csvfilename, jsonfilename):
 
 	csvfile = open(csvfilename, 'r');
 	jsonfile = open(jsonfilename, 'w');
-	#samplefile = open(samplefilename, 'w');
 
 	fieldnames = ("y","x","objectid","borough","order",
 		"sequence","mutcd","distance","direction",
 		"arrow","xx","yy","description");
 	reader = csv.DictReader( csvfile, fieldnames)
-	#counter = 0;
 	dictlist = [];
 	for counter,row in enumerate(reader):
 		# Adding an extra field called 'id', which is a unique identifier
 	    row['id']=counter;
 	    dictlist.append(row);
-	    #counter = counter + 1;
 
 	# write files
 	json.dump(dictlist,jsonfile);
 	jsonfile.close();
-
 
 def trim(inputCSVFilename,outputCSVFilename,trimSize):
 	import csv;
@@ -35,7 +31,6 @@ def trim(inputCSVFilename,outputCSVFilename,trimSize):
 		"arrow","xx","yy","description");	
 	reader = csv.DictReader(inputCSVFile, fieldnames);
 	writer = csv.DictWriter(outputCSVFile, fieldnames);
-	#counter = 0;
 	dictlist = [];
 	for counter,row in enumerate(reader):
 		if counter <= trimSize:
@@ -55,13 +50,12 @@ def trimFromIndex(inputCSVFilename,outputCSVFilename,trimSize,startIndex,verbose
 		"arrow","xx","yy","description");	
 	reader = csv.DictReader(inputCSVFile, fieldnames);
 	writer = csv.DictWriter(outputCSVFile, fieldnames);
-	#counter = 0;
 	dictlist = [];
 	for counter,row in enumerate(reader):
 		if counter >= startIndex:
 			if verbose:
 				print "Trimming: counter: "+str(counter);
-			if counter <= (startIndex + trimSize):
+			if counter <= (startIndex + trimSize - 1):
 				writer.writerow(row);
 			else:
 				break;

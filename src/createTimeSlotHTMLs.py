@@ -73,7 +73,7 @@ def createIndexFiles(jsonFilename,outputDir,indexFilenameListFilename,verbose=Fa
 	for tupleIndex,tupleInfo in enumerate(tuplesList):
 		if verbose:
 			print "tupleIndex: "+str(tupleIndex);
-		indexList = createIndexList(jsonData,tupleInfo);
+		indexList = createIndexList2(jsonData,tupleInfo);
 		indexFile = open(tupleInfo.indexFilename,'w');
 		cPickle.dump(indexList,indexFile);
 		indexFile.close();
@@ -83,22 +83,36 @@ def createIndexFiles(jsonFilename,outputDir,indexFilenameListFilename,verbose=Fa
 	outputFile.close();
 	os.chdir(originalDirectory);
 
-def createIndexList(jsonData,tupleInfo):
+def createIndexListOld(jsonData,tupleInfo):
 	indexList = [];
 	for jsonIndex,jsonLine in enumerate(jsonData):
 		validDaysList = buildValidDaysList(jsonLine);
 		if ((tupleInfo.dayOfWeek in validDaysList) and
-			(startTimeIsAfterInclusive(jsonLine['startTime'],tupleInfo.startTime,False)) and
-			(endTimeIsBeforeInclusive(jsonLine['endTime'],tupleInfo.endTime,False))
+			(timeIsAfterInclusive(jsonLine['startTime'],tupleInfo.startTime,False)) and
+			(timeIsBeforeInclusive(jsonLine['endTime'],tupleInfo.endTime,False))
 			):
-			if jsonIndex == 1 and tupleInfo.startTime == '12:00':
-				print "Sign start time: "+jsonLine['startTime'];
-				print "Sign end time: "+jsonLine['endTime'];
-				print "Tupleinfo start time: "+tupleInfo.startTime;
-				print "Tupleinfo end time: "+tupleInfo.endTime;
-			#indexList.append(jsonIndex);
 			indexList.append(jsonLine['id']);
-		
+	return indexList;
+
+def createIndexList2(jsonData,tupleInfo):
+	indexList = [];
+	for jsonIndex,jsonLine in enumerate(jsonData):
+		validDaysList = buildValidDaysList(jsonLine);
+		if (tupleInfo.dayOfWeek in validDaysList):
+			if timeIsAfterInclusive(jsonLine['endTime'],jsonLine['startTime']):
+				if ((
+						timeIsAfterInclusive('00:00',tupleInfo.startTime) and
+						timeIsBeforeInclusive(jsonLine['endTime'],tupleInfo.endTime)
+					) or
+					(
+						timeIsAfterInclusive(jsonLine['startTime'],tupleInfo.startTime) and
+						timeIsBeforeInclusive('23:59',tupleInfo.endTime)
+					)):
+					indexList.append(jsonLine['id']);
+			else:
+				if (timeIsAfterInclusive(jsonLine['startTime'],tupleInfo.startTime,False) and
+				timeIsBeforeInclusive(jsonLine['endTime'],tupleInfo.endTime,False)):
+					indexList.append(jsonLine['id']);
 	return indexList;
 
 def createIndexFilesList(outputDir,indexFilenameListFilename,verbose=False):
@@ -176,7 +190,7 @@ def startAndEndTimeFromTimeSlotIndex(timeSlotIndex):
 	endTime = hour+":"+minutePlus14+'';
 	return (startTime,endTime);
 
-def startTimeIsAfterInclusive(baselineTime,startTime,debug=False):
+def timeIsAfterInclusive(baselineTime,startTime,debug=False):
 	if baselineTime == '' or startTime == '':
 		if debug:
 			print 'Error: baselineTime: '+str(baselineTime)+', startTime: '+str(startTime);
@@ -189,7 +203,7 @@ def startTimeIsAfterInclusive(baselineTime,startTime,debug=False):
 			print 'Error parsing.'
 			print 'Error: baselineTime: '+str(baselineTime)+', startTime: '+str(startTime);
 		# Can handle this case
-		if baselineTime=='TNI':
+		if baselineTime=='TNI' or startTime=='TNI':
 			return False;
 		else:
 			print 'Uncaught exception.'
@@ -201,7 +215,7 @@ def startTimeIsAfterInclusive(baselineTime,startTime,debug=False):
 	else:
 		return False;
 
-def endTimeIsBeforeInclusive(baselineTime,endTime,debug=False):
+def timeIsBeforeInclusive(baselineTime,endTime,debug=False):
 	if baselineTime == '' or endTime == '':
 		if debug:
 			print 'Error: baselineTime: '+str(baselineTime)+', endTime: '+str(endTime);
@@ -214,7 +228,7 @@ def endTimeIsBeforeInclusive(baselineTime,endTime,debug=False):
 			print 'Error parsing.'
 			print 'Error: baselineTime: '+str(baselineTime)+', endTime: '+str(endTime);
 		# Can handle this case
-		if baselineTime=='TNI':
+		if baselineTime=='TNI' or endTime=='TNI':
 			return False;
 		else:
 			print 'Uncaught exception.'

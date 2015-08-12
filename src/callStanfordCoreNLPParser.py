@@ -10,7 +10,8 @@ def run(classPath,inputFilename):
 	# 	"-Xmx2g","edu.stanford.nlp.pipeline.StanfordCoreNLP",
 	# 	"-file","..\data\\"+inputFilename]));
 	parser = "edu.stanford.nlp.pipeline.StanfordCoreNLP";
-	annotators = "-annotators tokenize,ssplit,pos,lemma,ner,parse";
+	#annotators = "-annotators tokenize,ssplit,pos,lemma,ner,parse -ssplit.eolonly";
+	annotators = "-props default.properties";
 	#returnCode = (call("java -cp \"..\stanford-corenlp-full-2015-01-30\*\" -Xmx2g "+parser+" "+annotators+" -file "+inputFilename,shell=True));
 	returnCode = (call("java -cp "+classPath+" -Xmx2g "+parser+" "+annotators+" -file "+inputFilename,shell=True));
 	print "Return code: "+str(returnCode);
@@ -20,6 +21,7 @@ def runFilelist(classPath,fileListFilename,outputDir):
 	from subprocess import call;
 	parser = "edu.stanford.nlp.pipeline.StanfordCoreNLP";
 	annotators = "-annotators tokenize,ssplit,pos,lemma,ner,parse";
+	annotators = "-props \'default.properties\'";
 	#returnCode = (call("java -cp \"..\stanford-corenlp-full-2015-01-30\*\" -Xmx2g "
 	returnCode = (call("java -cp "+classPath+" -Xmx2g "
 		+parser+" "+annotators+" -filelist "+outputDir+fileListFilename

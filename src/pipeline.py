@@ -79,13 +79,13 @@ import jsonHelper;
 import time;
 # To run the entire thing, set skipTrim to True, all else to False.
 skipTrim = True;
-skipPreprocess = False;
-skipNLP = False;
-skipParse = False;
-skipIndex = False;
-skipCleanLongTimes = False;
-skipAddValidDays = False;
-skipGeoJSONConvert = False;
+skipPreprocess = True;
+skipNLP = True;
+skipParse = True;
+skipIndex = True;
+skipCleanLongTimes = True;
+skipAddValidDays = True;
+skipGeoJSONConvert = True;
 skipTimeSlotIndex = False;
 skipTimeSlotHTML = False;
 skipTimeSlotGeoJSON = False;
@@ -100,9 +100,9 @@ def preprocess():
 
 	if not skipTrim:
 		print 'Trimming original CSV to a smaller size.';
-		trimSize = 100;
+		trimSize = 1000;
 		import convertCSVtoJSONList as convertCtoJ;
-		convertCtoJ.trimFromIndex(csvfilename,csvTrimFilename,trimSize,46373);
+		convertCtoJ.trimFromIndex(csvfilename,csvTrimFilename,trimSize,214000);
 		import shutil;
 		shutil.copyfile(csvTrimFilename,csvTrimSaveFilename);
 	else:
@@ -230,7 +230,7 @@ def preprocess():
 	if not skipTimeSlotIndex:
 		print "Creating index files for all time slots.";
 		startTimeSlots = time.time();
-		createTimeSlotHTMLs.createIndexFiles(validDaysJSONFilename,timeSlotIndexDir,timeSlotIndexFilename);
+		createTimeSlotHTMLs.createIndexFiles(validDaysJSONFilename,timeSlotIndexDir,timeSlotIndexFilename,True);
 		endTimeSlots = time.time();
 		print "["+str(endTimeSlots-startTimeSlots)+" seconds]";
 	else:
@@ -289,7 +289,7 @@ def preprocess():
 		print "["+str(end-start)+" seconds]";
 
 	# return latest JSON object
-	tempJSONObj = jsonHelper.getJSONObjectFromFile(validDaysJSONFilename);
+	tempJSONObj = jsonHelper.getJSONObjectFromFile(timeSlotJSONFilename);
 	return tempJSONObj;
 
 if __name__ == '__main__':

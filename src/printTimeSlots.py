@@ -4,7 +4,7 @@ def printTimeSlots(jsonLine):
 	periods = ['am','pm'];
 	hours = [0,1,2,3,4,5,6,7,8,9,10,11];
 	minutes = ['00','15','30','45'];
-	days = ['sun','mon','tues','wed','thurs','fri','sat'];
+	days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
 
 	print "__________  S  M  T  W  Th  F  S"
 	for period in periods:
@@ -13,7 +13,10 @@ def printTimeSlots(jsonLine):
 				fieldname = 'time'+hourToString(hour)+str(minute)+period;
 				print fieldname,;
 				for day in days:
-					print ' '+jsonLine[fieldname],;
+					if jsonLine['valid'+day] == 'true':
+						print ' '+jsonLine[fieldname],;
+					else:
+						print ' '+'f',;
 				print '';
 
 

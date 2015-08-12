@@ -10,6 +10,7 @@
 # Making some utility functions here
 # We're looking at the "sentence" objects here. Each "sentence" is a line.
 import xml.etree.ElementTree as ET;
+from collections import OrderedDict;
 
 # Parse, then return the object
 def parse(xmlFilename):
@@ -115,6 +116,44 @@ def getTwoTimes(parsedXML,lineNumber,debug=False):
 
 	# Assumes times are in order int he dicionary.
 	# Pretty big assumption.
+	return (getKeyAtIndex(timeDict,0),getKeyAtIndex(timeDict,1));
+
+def getTwoTimesOrderedDict(parsedXML,lineNumber,debug=False):
+	if debug == False:
+		None;
+	else:
+		print "debug is True.";
+		print "lineNumber is: "+str(lineNumber);
+	root = parsedXML;
+	timeDict = OrderedDict();
+	# How many different time's we've seen
+	timeCounter = 0;
+	for document in root.findall('document'):
+		for sentences in document.findall('sentences'):
+			try:
+				sentence = sentences[lineNumber];
+				for tokens in sentence.findall('tokens'):
+					for token in tokens.findall('token'):
+						if debug:
+							for word in token.findall('word'):
+								print "token: "+word.text;
+						for timex in token.findall('Timex'):
+							if timex.get('type') == 'TIME':
+								# the time is the dictinoary key
+								time = timex.text;
+								if not time in timeDict:
+									timeDict[time] = timeCounter;
+									timeCounter = timeCounter + 1;
+								if debug:
+									print "time: "+time;
+			except IndexError:
+				print "IndexError in getTwoTimes!";
+				continue;
+
+	if debug:
+		for key,value in timeDict.iteritems():
+			print key+" "+str(value);
+
 	return (getKeyAtIndex(timeDict,0),getKeyAtIndex(timeDict,1));
 
 # Given a dictionary and a timeCounter as a value, find the key that has it

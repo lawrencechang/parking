@@ -46,7 +46,6 @@ def convertToGeoJSON(jsonObject):
 			point = geojson.Point((latitude,longitude));
 			for key in line.keys():
 				currentProperty[key] = line[key];
-				#propertiesList.append(key,line[key])
 			newFeature = geojson.Feature(geometry=point,properties=currentProperty,id=idNum);
 			featureList.append(newFeature);
 
@@ -56,7 +55,6 @@ def convertToGeoJSONFile(inputJSONFilename,outputGeoJSONFilename):
 	jsonObject = getJSONObjectFromFile(inputJSONFilename);
 	geoJSONObject = convertToGeoJSON(jsonObject);
 	outputFile = open(outputGeoJSONFilename,'w');
-	#geojson.dumps(geoJSONObject,outputFile);
 	json.dump(geoJSONObject,outputFile);
 	outputFile.close();
 
